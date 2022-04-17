@@ -23,6 +23,10 @@ export class Game extends Game3D {
 
     Textures: Record<string, WebGLTexture> = {};
 
+    /**
+     * A typed array with instance data, suitable for passing to `gl.bufferData`.
+     * Each instance is FLOATS_PER_INSTANCE floats long; see Instance2DLayout.
+     */
     InstanceData = new Float32Array(this.World.Capacity * FLOATS_PER_INSTANCE);
     InstanceBuffer = this.Gl.createBuffer()!;
 
@@ -93,6 +97,17 @@ export class Game extends Game3D {
             false,
             BYTES_PER_INSTANCE,
             4 * 8
+        );
+
+        this.Gl.enableVertexAttribArray(material.Locations.InstanceSprite);
+        this.Gl.vertexAttribDivisor(material.Locations.InstanceSprite, 1);
+        this.Gl.vertexAttribPointer(
+            material.Locations.InstanceSprite,
+            4,
+            GL_FLOAT,
+            false,
+            BYTES_PER_INSTANCE,
+            4 * 12
         );
     }
 

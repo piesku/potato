@@ -13,9 +13,14 @@ let vertex = `#version 300 es\n
     in vec4 attr_rotation; // [a, b, c, d]
     in vec4 attr_translation; // [x, y, z, w: Has.Render]
     in vec4 attr_color;
+    in vec4 attr_sprite;
 
-    out vec4 vert_color;
     out vec2 vert_texcoord;
+    out vec4 vert_color;
+    out vec4 vert_sprite;
+
+    const float SHEET_WIDTH = 256.0;
+    const float SPRITE_WIDTH = 32.0;
 
     void main() {
         mat4 world = mat4(
@@ -31,8 +36,8 @@ let vertex = `#version 300 es\n
             gl_Position.z = 2.0;
         }
 
+        vert_texcoord = (attr_sprite.xy + attr_texcoord) * SPRITE_WIDTH / SHEET_WIDTH;
         vert_color = attr_color;
-        vert_texcoord = attr_texcoord;
     }
 `;
 
@@ -41,8 +46,8 @@ let fragment = `#version 300 es\n
 
     uniform sampler2D sheet;
 
-    in vec4 vert_color;
     in vec2 vert_texcoord;
+    in vec4 vert_color;
 
     out vec4 frag_color;
 
@@ -70,6 +75,7 @@ export function mat_instanced2d(gl: WebGL2RenderingContext): Material<Instanced2
             InstanceRotation: gl.getAttribLocation(program, "attr_rotation")!,
             InstanceTranslation: gl.getAttribLocation(program, "attr_translation")!,
             InstanceColor: gl.getAttribLocation(program, "attr_color")!,
+            InstanceSprite: gl.getAttribLocation(program, "attr_sprite")!,
         },
     };
 }
