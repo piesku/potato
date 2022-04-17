@@ -14,8 +14,8 @@
   var GL_PIXEL_UNSIGNED_BYTE = 5121;
   var GL_FRAGMENT_SHADER = 35632;
   var GL_VERTEX_SHADER = 35633;
-  var GL_LINEAR = 9729;
-  var GL_NEAREST_MIPMAP_LINEAR = 9986;
+  var GL_NEAREST = 9728;
+  var GL_NEAREST_MIPMAP_NEAREST = 9984;
   var GL_TEXTURE_MAG_FILTER = 10240;
   var GL_TEXTURE_MIN_FILTER = 10241;
   var GL_TEXTURE_WRAP_S = 10242;
@@ -39,8 +39,8 @@
     gl.bindTexture(GL_TEXTURE_2D, texture);
     gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GL_RGBA, GL_PIXEL_UNSIGNED_BYTE, image);
     gl.generateMipmap(GL_TEXTURE_2D);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     return texture;
@@ -703,10 +703,10 @@
     let transform = game2.World.Transform2D[entity];
     let rigid_body = game2.World.RigidBody2D[entity];
     if (rigid_body.Kind === 1 /* Dynamic */) {
+      rigid_body.VelocityIntegrated[1] += GRAVITY * delta;
       scale(rigid_body.Acceleration, rigid_body.Acceleration, delta);
       add(rigid_body.VelocityIntegrated, rigid_body.VelocityIntegrated, rigid_body.Acceleration);
       scale(rigid_body.VelocityIntegrated, rigid_body.VelocityIntegrated, rigid_body.Friction);
-      rigid_body.VelocityIntegrated[1] += GRAVITY * delta;
       let vel_delta = [0, 0];
       scale(vel_delta, rigid_body.VelocityIntegrated, delta);
       add(transform.Translation, transform.Translation, vel_delta);
