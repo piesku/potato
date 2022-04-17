@@ -24,6 +24,7 @@ var GL_TEXTURE_2D = 3553;
 var GL_TEXTURE0 = 33984;
 var GL_REPEAT = 10497;
 var GL_FRAMEBUFFER = 36160;
+var GL_UNPACK_FLIP_Y_WEBGL = 37440;
 var GL_FLOAT = 5126;
 
 
@@ -301,9 +302,11 @@ in vec2 attr_texcoord;
 in vec4 attr_rotation; 
 in vec4 attr_translation; 
 in vec4 attr_color;
+in vec4 attr_sprite;
 
-out vec4 vert_color;
 out vec2 vert_texcoord;
+out vec4 vert_color;
+out vec4 vert_sprite;
 
 void main() {
 mat4 world = mat4(
@@ -319,8 +322,8 @@ if (attr_translation.w == 0.0) {
 gl_Position.z = 2.0;
 }
 
+vert_texcoord = (attr_sprite.xy + attr_texcoord) / attr_sprite.zw;
 vert_color = attr_color;
-vert_texcoord = attr_texcoord;
 }
 `;
 var fragment = `#version 300 es
@@ -329,8 +332,8 @@ precision mediump float;
 
 uniform sampler2D sheet;
 
-in vec4 vert_color;
 in vec2 vert_texcoord;
+in vec4 vert_color;
 
 out vec4 frag_color;
 
@@ -354,7 +357,8 @@ VertexPosition: gl.getAttribLocation(program, "attr_position"),
 VertexTexcoord: gl.getAttribLocation(program, "attr_texcoord"),
 InstanceRotation: gl.getAttribLocation(program, "attr_rotation"),
 InstanceTranslation: gl.getAttribLocation(program, "attr_translation"),
-InstanceColor: gl.getAttribLocation(program, "attr_color")
+InstanceColor: gl.getAttribLocation(program, "attr_color"),
+InstanceSprite: gl.getAttribLocation(program, "attr_sprite")
 }
 };
 }
@@ -650,6 +654,9 @@ function rand() {
 seed = seed * 16807 % 2147483647;
 return (seed - 1) / 2147483646;
 }
+function integer(min = 0, max = 1) {
+return ~~(rand() * (max - min + 1) + min);
+}
 function float(min = 0, max = 1) {
 return rand() * (max - min) + min;
 }
@@ -745,7 +752,7 @@ let material = game2.MaterialInstanced;
 game2.Gl.useProgram(material.Program);
 game2.Gl.uniformMatrix4fv(material.Locations.Pv, false, eye.Pv);
 game2.Gl.activeTexture(GL_TEXTURE0);
-game2.Gl.bindTexture(GL_TEXTURE_2D, game2.Textures["ziemniak.png"]);
+game2.Gl.bindTexture(GL_TEXTURE_2D, game2.Textures["spritesheet.png"]);
 game2.Gl.uniform1i(material.Locations.SpriteSheet, 0);
 game2.Gl.bindBuffer(GL_ARRAY_BUFFER, game2.InstanceBuffer);
 game2.Gl.bufferData(GL_ARRAY_BUFFER, game2.InstanceData, GL_STREAM_DRAW);
@@ -892,6 +899,7 @@ this.MaterialInstanced = mat_instanced2d(this.Gl);
 this.Textures = {};
 this.InstanceData = new Float32Array(this.World.Capacity * FLOATS_PER_INSTANCE);
 this.InstanceBuffer = this.Gl.createBuffer();
+this.Gl.pixelStorei(GL_UNPACK_FLIP_Y_WEBGL, true);
 let material = this.MaterialInstanced;
 let vertex_buf = this.Gl.createBuffer();
 this.Gl.bindBuffer(GL_ARRAY_BUFFER, vertex_buf);
@@ -911,6 +919,9 @@ this.Gl.vertexAttribPointer(material.Locations.InstanceTranslation, 4, GL_FLOAT,
 this.Gl.enableVertexAttribArray(material.Locations.InstanceColor);
 this.Gl.vertexAttribDivisor(material.Locations.InstanceColor, 1);
 this.Gl.vertexAttribPointer(material.Locations.InstanceColor, 4, GL_FLOAT, false, BYTES_PER_INSTANCE, 4 * 8);
+this.Gl.enableVertexAttribArray(material.Locations.InstanceSprite);
+this.Gl.vertexAttribDivisor(material.Locations.InstanceSprite, 1);
+this.Gl.vertexAttribPointer(material.Locations.InstanceSprite, 4, GL_FLOAT, false, BYTES_PER_INSTANCE, 4 * 12);
 }
 FrameUpdate(delta) {
 sys_resize2d(this, delta);
@@ -970,7 +981,7 @@ return [v, p, q, a];
 }
 
 
-function render2d(color) {
+function render2d(sheet_size, sprite_offset, color = [1, 1, 1, 1]) {
 return (game2, entity) => {
 let instance_offset = entity * FLOATS_PER_INSTANCE;
 game2.InstanceData[instance_offset + 6] = 0;
@@ -979,10 +990,15 @@ game2.InstanceData[instance_offset + 8] = color[0];
 game2.InstanceData[instance_offset + 9] = color[1];
 game2.InstanceData[instance_offset + 10] = color[2];
 game2.InstanceData[instance_offset + 11] = color[3];
+game2.InstanceData[instance_offset + 12] = sprite_offset[0];
+game2.InstanceData[instance_offset + 13] = sheet_size[1] - sprite_offset[1] - 1;
+game2.InstanceData[instance_offset + 14] = sheet_size[0];
+game2.InstanceData[instance_offset + 15] = sheet_size[1];
 game2.World.Signature[entity] |= 64 /* Render2D */;
 game2.World.Render2D[entity] = {
 Detail: game2.InstanceData.subarray(instance_offset + 6, instance_offset + 8),
-Color: game2.InstanceData.subarray(instance_offset + 8, instance_offset + 12)
+Color: game2.InstanceData.subarray(instance_offset + 8, instance_offset + 12),
+Sprite: game2.InstanceData.subarray(instance_offset + 12, instance_offset + 16)
 };
 };
 }
@@ -1017,7 +1033,7 @@ let dynamic_count = 5e3;
 for (let i = 0; i < dynamic_count; i++) {
 instantiate(game2, [
 transform2d([float(-10, 10), float(9, 10)], 0),
-render2d(hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
+render2d([8, 8], [integer(0, 1), 0], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
 order(1 - i / dynamic_count),
 rigid_body2d(1 /* Dynamic */, float(0.98, 0.99))
 ]);
@@ -1027,7 +1043,7 @@ rigid_body2d(1 /* Dynamic */, float(0.98, 0.99))
 
 var game = new Game4();
 window.game = game;
-Promise.all([load_texture(game, "checker1.png"), load_texture(game, "ziemniak.png")]).then(() => {
+Promise.all([load_texture(game, "checker1.png"), load_texture(game, "spritesheet.png")]).then(() => {
 scene_stage(game);
 game.Start();
 });
