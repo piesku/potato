@@ -28,7 +28,18 @@ function update(game: Game, entity: Entity, delta: number) {
 
         if (transform.Translation[1] < bottom) {
             transform.Translation[1] = bottom;
-            rigid_body.VelocityIntegrated[1] *= float(-3, -1);
+            rigid_body.VelocityIntegrated[0] = float(-3, 3);
+            rigid_body.VelocityIntegrated[1] *= float(-2, -1);
+        }
+
+        if (transform.Translation[0] < left) {
+            transform.Translation[0] = left;
+            rigid_body.VelocityIntegrated[0] *= -1;
+        }
+
+        if (transform.Translation[0] > -left) {
+            transform.Translation[0] = -left;
+            rigid_body.VelocityIntegrated[0] *= -1;
         }
     }
 }
