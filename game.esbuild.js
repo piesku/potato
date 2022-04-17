@@ -763,9 +763,8 @@
       Inverse: create()
     };
   }
-  function resize_ortho_keeping_unit_size(projection, aspect, viewport_height, unit_size_in_px) {
-    let radius_in_units = viewport_height / unit_size_in_px / 2;
-    from_ortho(projection.Projection, radius_in_units, radius_in_units * aspect, -radius_in_units, -radius_in_units * aspect, projection.Near, projection.Far);
+  function resize_ortho_constant(projection, aspect) {
+    from_ortho(projection.Projection, projection.Radius, projection.Radius * aspect, -projection.Radius, -projection.Radius * aspect, projection.Near, projection.Far);
     invert(projection.Inverse, projection.Projection);
   }
 
@@ -782,8 +781,9 @@
         if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
           let camera = game2.World.Camera[i];
           if (camera.Kind == 0 /* Canvas */ && camera.Projection.Kind == 1 /* Orthographic */) {
+            camera.Projection.Radius = game2.ViewportHeight / UNIT_PX / 2;
             let aspect = game2.ViewportWidth / game2.ViewportHeight;
-            resize_ortho_keeping_unit_size(camera.Projection, aspect, game2.ViewportHeight, UNIT_PX);
+            resize_ortho_constant(camera.Projection, aspect);
             break;
           }
         }
