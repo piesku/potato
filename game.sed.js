@@ -654,9 +654,6 @@ function rand() {
 seed = seed * 16807 % 2147483647;
 return (seed - 1) / 2147483646;
 }
-function integer(min = 0, max = 1) {
-return ~~(rand() * (max - min + 1) + min);
-}
 function float(min = 0, max = 1) {
 return rand() * (max - min) + min;
 }
@@ -691,7 +688,16 @@ let bottom = -game2.ViewportHeight / 2 / UNIT_PX;
 let left = -game2.ViewportWidth / 2 / UNIT_PX;
 if (transform.Translation[1] < bottom) {
 transform.Translation[1] = bottom;
-rigid_body.VelocityIntegrated[1] *= float(-3, -1);
+rigid_body.VelocityIntegrated[0] = float(-3, 3);
+rigid_body.VelocityIntegrated[1] *= float(-2, -1);
+}
+if (transform.Translation[0] < left) {
+transform.Translation[0] = left;
+rigid_body.VelocityIntegrated[0] *= -1;
+}
+if (transform.Translation[0] > -left) {
+transform.Translation[0] = -left;
+rigid_body.VelocityIntegrated[0] *= -1;
 }
 }
 }
@@ -1032,8 +1038,14 @@ instantiate(game2, [transform2d([0, 0]), camera_canvas(orthographic(5, 1, 3))]);
 let dynamic_count = 5e3;
 for (let i = 0; i < dynamic_count; i++) {
 instantiate(game2, [
-transform2d([float(-10, 10), float(9, 10)], 0),
-render2d([8, 8], [integer(0, 1), 0], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
+transform2d([float(-10, -3), float(10, 100)], 0),
+render2d([8, 8], [0, 0], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
+order(1 - i / dynamic_count),
+rigid_body2d(1 /* Dynamic */, float(0.98, 0.99))
+]);
+instantiate(game2, [
+transform2d([float(3, 10), float(10, 100)], 0),
+render2d([8, 8], [1, 0], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
 order(1 - i / dynamic_count),
 rigid_body2d(1 /* Dynamic */, float(0.98, 0.99))
 ]);
