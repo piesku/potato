@@ -9,7 +9,7 @@ export interface Render2D {
     Sprite: Float32Array;
 }
 
-export function render2d(sprite_offset: Vec2, color: Vec4 = [1, 1, 1, 1]) {
+export function render2d(sheet_size: Vec2, sprite_offset: Vec2, color: Vec4 = [1, 1, 1, 1]) {
     return (game: Game, entity: Entity) => {
         let instance_offset = entity * FLOATS_PER_INSTANCE;
         // Detail.
@@ -22,13 +22,16 @@ export function render2d(sprite_offset: Vec2, color: Vec4 = [1, 1, 1, 1]) {
         game.InstanceData[instance_offset + 11] = color[3];
         // Sprite.
         game.InstanceData[instance_offset + 12] = sprite_offset[0];
-        game.InstanceData[instance_offset + 13] = sprite_offset[1];
+        // Flip the Y offset; sprite_offset is +Y=down, while texcoords are +Y=up.
+        game.InstanceData[instance_offset + 13] = sheet_size[1] - sprite_offset[1] - 1;
+        game.InstanceData[instance_offset + 14] = sheet_size[0];
+        game.InstanceData[instance_offset + 15] = sheet_size[1];
 
         game.World.Signature[entity] |= Has.Render2D;
         game.World.Render2D[entity] = {
             Detail: game.InstanceData.subarray(instance_offset + 6, instance_offset + 8),
             Color: game.InstanceData.subarray(instance_offset + 8, instance_offset + 12),
-            Sprite: game.InstanceData.subarray(instance_offset + 12, instance_offset + 14),
+            Sprite: game.InstanceData.subarray(instance_offset + 12, instance_offset + 16),
         };
     };
 }

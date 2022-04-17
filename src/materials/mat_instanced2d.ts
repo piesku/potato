@@ -19,9 +19,6 @@ let vertex = `#version 300 es\n
     out vec4 vert_color;
     out vec4 vert_sprite;
 
-    const float SHEET_WIDTH = 256.0;
-    const float SPRITE_WIDTH = 32.0;
-
     void main() {
         mat4 world = mat4(
             attr_rotation.xy, 0, 0,
@@ -36,7 +33,7 @@ let vertex = `#version 300 es\n
             gl_Position.z = 2.0;
         }
 
-        vert_texcoord = (attr_sprite.xy + attr_texcoord) * SPRITE_WIDTH / SHEET_WIDTH;
+        vert_texcoord = (attr_sprite.xy + attr_texcoord) / attr_sprite.zw;
         vert_color = attr_color;
     }
 `;
