@@ -29,8 +29,6 @@ export class Game extends Game3D {
     constructor() {
         super();
 
-        //this.Gl.enable(GL_BLEND);
-
         let material = this.MaterialInstanced;
 
         // Vertex positions and texture coordinates.
