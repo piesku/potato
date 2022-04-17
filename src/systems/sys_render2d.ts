@@ -42,7 +42,7 @@ function render_all(game: Game, eye: CameraEye) {
     game.Gl.uniformMatrix4fv(material.Locations.Pv, false, eye.Pv);
 
     game.Gl.activeTexture(GL_TEXTURE0);
-    game.Gl.bindTexture(GL_TEXTURE_2D, game.Textures["checker1.png"]);
+    game.Gl.bindTexture(GL_TEXTURE_2D, game.Textures["spritesheet.png"]);
     game.Gl.uniform1i(material.Locations.SpriteSheet, 0);
 
     game.Gl.bindBuffer(GL_ARRAY_BUFFER, game.InstanceBuffer);

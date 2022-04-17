@@ -5,15 +5,13 @@ PNGS := $(wildcard *.png)
 JPGS := $(wildcard *.jpg)
 WEBPS := $(PNGS:%=%.webp) $(JPGS:%=%.webp)
 
-all: $(WEBPS)
+all: spritesheet.png.webp
 
-%.png.flipped: %.png
-	@convert -flip $< $@
-
-%.png.webp: %.png.flipped
-	@echo "$< → $@"
-	@cwebp -short -z 9 $< -o $@
+%.png.webp: %.png
+	cwebp -short -z 9 $< -o $@
 
 %.jpg.webp: %.jpg
-	@echo "$< → $@"
-	@cwebp -short $< -o $@
+	cwebp -short $< -o $@
+
+spritesheet.png: ziemniak_surowy.png ziemniak_obrany.png ziemniak_gibs.png
+	montage -background transparent -tile 8x8 -geometry 32x32+0+0 $+ $@

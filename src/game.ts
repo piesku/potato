@@ -1,5 +1,11 @@
 import {Game3D} from "../common/game.js";
-import {GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, GL_STREAM_DRAW} from "../common/webgl.js";
+import {
+    GL_ARRAY_BUFFER,
+    GL_FLOAT,
+    GL_STATIC_DRAW,
+    GL_STREAM_DRAW,
+    GL_UNPACK_FLIP_Y_WEBGL,
+} from "../common/webgl.js";
 import {mat_instanced2d} from "./materials/mat_instanced2d.js";
 import {sys_camera2d} from "./systems/sys_camera2d.js";
 import {sys_control_always2d} from "./systems/sys_control_always2d.js";
@@ -32,6 +38,8 @@ export class Game extends Game3D {
 
     constructor() {
         super();
+
+        this.Gl.pixelStorei(GL_UNPACK_FLIP_Y_WEBGL, true);
 
         let material = this.MaterialInstanced;
 
