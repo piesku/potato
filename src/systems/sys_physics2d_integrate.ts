@@ -25,11 +25,13 @@ function update(game: Game, entity: Entity, delta: number) {
     let rigid_body = game.World.RigidBody2D[entity];
 
     if (rigid_body.Kind === RigidKind.Dynamic) {
-        // Compute change to velocity, including the gravity.
+        // Compute change to velocity due to the gravity.
+        rigid_body.VelocityIntegrated[1] += GRAVITY * delta;
+        // Compute change to velocity due to external forces.
         scale(rigid_body.Acceleration, rigid_body.Acceleration, delta);
         add(rigid_body.VelocityIntegrated, rigid_body.VelocityIntegrated, rigid_body.Acceleration);
+        // Apply friction.
         scale(rigid_body.VelocityIntegrated, rigid_body.VelocityIntegrated, rigid_body.Friction);
-        rigid_body.VelocityIntegrated[1] += GRAVITY * delta;
 
         // Apply velocity to position.
         let vel_delta: Vec2 = [0, 0];
