@@ -8,7 +8,6 @@ import {
     GL_DEPTH_COMPONENT24,
     GL_LINEAR,
     GL_NEAREST,
-    GL_NEAREST_MIPMAP_NEAREST,
     GL_PIXEL_UNSIGNED_BYTE,
     GL_REPEAT,
     GL_RGBA,
@@ -36,12 +35,11 @@ export function create_texture_from(gl: WebGLRenderingContext, image: HTMLImageE
     gl.bindTexture(GL_TEXTURE_2D, texture);
     gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GL_RGBA, GL_PIXEL_UNSIGNED_BYTE, image);
 
-    gl.generateMipmap(GL_TEXTURE_2D);
+    // gl.generateMipmap(GL_TEXTURE_2D);
 
-    // GL_NEAREST_MIPMAP_LINEAR is the default. Consider switching to
-    // GL_LINEAR_MIPMAP_LINEAR for the best quality.
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    // GL_LINEAR is the default; make it explicit.
+    // Default is GL_NEAREST_MIPMAP_LINEAR.
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // Default is GL_LINEAR.
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // GL_REPEAT is the default; make it explicit.

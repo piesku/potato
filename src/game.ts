@@ -21,14 +21,15 @@ import {World} from "./world.js";
 export const WORLD_CAPACITY = 50_001;
 export const FLOATS_PER_INSTANCE = 16;
 export const BYTES_PER_INSTANCE = FLOATS_PER_INSTANCE * 4;
-export const UNIT_PX = 32;
+export const BASE_UNIT_SIZE = 32;
 
 export class Game extends Game3D {
     World = new World(WORLD_CAPACITY);
 
     MaterialInstanced = mat_instanced2d(this.Gl);
-
     Textures: Record<string, WebGLTexture> = {};
+
+    UnitSize = BASE_UNIT_SIZE;
 
     /**
      * A typed array with instance data, suitable for passing to `gl.bufferData`.
