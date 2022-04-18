@@ -120,14 +120,17 @@ export class Game extends Game3D {
         );
     }
 
+    override FixedUpdate(delta: number) {
+        sys_physics2d_bounds(this, delta);
+        sys_physics2d_integrate(this, delta);
+        sys_transform2d(this, delta);
+    }
+
     override FrameUpdate(delta: number) {
         sys_control_player(this, delta);
         sys_control_always2d(this, delta);
 
         sys_move2d(this, delta);
-        sys_physics2d_integrate(this, delta);
-        sys_transform2d(this, delta);
-        sys_physics2d_bounds(this, delta);
 
         sys_resize2d(this, delta);
         sys_camera2d(this, delta);

@@ -160,8 +160,8 @@ export abstract class GameImpl {
             accumulator += delta;
             while (accumulator >= step) {
                 accumulator -= step;
-                // TODO Adjust InputDelta and InputDistance.
                 this.FixedUpdate(step);
+                this.InputReset();
             }
             this.FrameUpdate(delta);
             this.FrameReset(delta);
@@ -206,6 +206,12 @@ export abstract class GameImpl {
     FixedUpdate(step: number) {}
     FrameUpdate(delta: number) {}
 
+    InputReset() {
+        for (let name in this.InputDelta) {
+            this.InputDelta[name] = 0;
+        }
+    }
+
     FrameReset(delta: number) {
         this.ViewportResized = false;
 
@@ -224,10 +230,6 @@ export abstract class GameImpl {
         }
         if (this.InputDelta["Touch1"] === -1) {
             this.InputDistance["Touch1"] = 0;
-        }
-
-        for (let name in this.InputDelta) {
-            this.InputDelta[name] = 0;
         }
 
         let update = performance.now() - this.Now;
