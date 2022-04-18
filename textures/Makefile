@@ -13,5 +13,8 @@ all: spritesheet.png.webp
 %.jpg.webp: %.jpg
 	cwebp -short $< -o $@
 
-spritesheet.png: ziemniak_surowy.png ziemniak_obrany.png ziemniak_gibs.png
-	montage -background transparent -tile 8x8 -geometry 32x32+0+0 $+ $@
+spritesheet.png: \
+garnek11.png garnek12.png garnek13.png garnek14.png \
+garnek21.png garnek22.png garnek23.png garnek24.png \
+ziemniak_surowy.png ziemniak_obrany.png ziemniak_gibs.png
+	montage -mode Concatenate -background transparent -tile 4x8 $+ $@

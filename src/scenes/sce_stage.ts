@@ -21,20 +21,25 @@ export function scene_stage(game: Game) {
         control_player(),
     ]);
 
-    let dynamic_count = 5_000;
+    // Garnek1.
+    instantiate(game, [transform2d([-6, 0], 0, [4, 3]), render2d([4, 2.33], [0, 0]), order(1)]);
 
+    // Garnek2.
+    instantiate(game, [transform2d([6, 0], 0, [4, 3]), render2d([4, 2.33], [0, 1]), order(1)]);
+
+    let dynamic_count = 5_000;
     for (let i = 0; i < dynamic_count; i++) {
         instantiate(game, [
-            transform2d([float(-10, -3), float(10, 100)], 0),
-            render2d([8, 8], [0, 0], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
+            transform2d([float(-8, -4), float(10, 100)], 0),
+            render2d([16, 7], [0, 6], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
             // Place entities from closest to the farthest away to avoid overdraw.
             order(1 - i / dynamic_count),
             rigid_body2d(RigidKind.Dynamic, float(0.99, 0.999)),
         ]);
 
         instantiate(game, [
-            transform2d([float(3, 10), float(10, 100)], 0),
-            render2d([8, 8], [1, 0], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
+            transform2d([float(4, 8), float(10, 100)], 0),
+            render2d([16, 7], [1, 6], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
             // Place entities from closest to the farthest away to avoid overdraw.
             order(1 - i / dynamic_count),
             rigid_body2d(RigidKind.Dynamic, float(0.99, 0.999)),
