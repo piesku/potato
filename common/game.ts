@@ -22,7 +22,6 @@ export abstract class GameImpl {
     InputState: Record<string, number> = {
         MouseX: 0,
         MouseY: 0,
-        WheelY: 0,
     };
     // Changes of InputState that happened right before this frame.
     // 1 = pressed, -1 = released, 0 = no change.
@@ -74,7 +73,6 @@ export abstract class GameImpl {
         });
         this.Ui.addEventListener("wheel", (evt) => {
             evt.preventDefault();
-            this.InputState["WheelY"] += evt.deltaY;
             this.InputDelta["WheelY"] = evt.deltaY;
         });
 
