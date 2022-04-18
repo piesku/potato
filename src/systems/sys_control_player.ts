@@ -18,7 +18,11 @@ export function sys_control_player(game: Game, delta: number) {
 
     if (game.InputDelta["WheelY"]) {
         game.InputState["WheelY"] = clamp(-500, 500, game.InputState["WheelY"]);
-        game.UnitSize = BASE_UNIT_SIZE * 4 ** (game.InputState["WheelY"] / -500);
+        let zoom = 4 ** (game.InputState["WheelY"] / -500);
+        if (0.9 < zoom && zoom < 1.1) {
+            zoom = 1;
+        }
+        game.UnitSize = BASE_UNIT_SIZE * zoom;
         game.ViewportResized = true;
     }
 
