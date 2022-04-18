@@ -9,16 +9,18 @@ import {Has} from "../world.js";
 const QUERY = Has.ControlPlayer;
 
 export function sys_control_player(game: Game, delta: number) {
-    if (game.InputDistance["Mouse0"] > 10) {
+    if (game.InputDelta["Mouse0"] === 1) {
+        document.body.classList.add("grabbing");
+    } else if (game.InputDelta["Mouse0"] === -1) {
+        document.body.classList.remove("grabbing");
+    }
+
+    if (game.InputDistance["Mouse0"] > 5) {
         for (let i = 0; i < game.World.Signature.length; i++) {
             if ((game.World.Signature[i] & QUERY) === QUERY) {
                 update(game, i);
             }
         }
-
-        document.body.classList.add("grabbing");
-    } else if (game.InputDelta["Mouse0"] === -1) {
-        document.body.classList.remove("grabbing");
     }
 }
 

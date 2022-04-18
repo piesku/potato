@@ -207,14 +207,6 @@ export abstract class GameImpl {
     FrameUpdate(delta: number) {}
 
     InputReset() {
-        for (let name in this.InputDelta) {
-            this.InputDelta[name] = 0;
-        }
-    }
-
-    FrameReset(delta: number) {
-        this.ViewportResized = false;
-
         if (this.InputDelta["Mouse0"] === -1) {
             this.InputDistance["Mouse0"] = 0;
         }
@@ -231,6 +223,14 @@ export abstract class GameImpl {
         if (this.InputDelta["Touch1"] === -1) {
             this.InputDistance["Touch1"] = 0;
         }
+
+        for (let name in this.InputDelta) {
+            this.InputDelta[name] = 0;
+        }
+    }
+
+    FrameReset(delta: number) {
+        this.ViewportResized = false;
 
         let update = performance.now() - this.Now;
         if (update_span) {
