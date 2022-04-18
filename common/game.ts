@@ -60,10 +60,15 @@ export abstract class GameImpl {
             this.InputDelta[`Mouse${evt.button}`] = -1;
         });
         this.Ui.addEventListener("mousemove", (evt) => {
+            // Browser-compat: Compute movement in DIPs (device-independent
+            // pixels). Some browsers compute MouseEvent.movement{X,Y} using
+            // physical pixels or CSS pixels.
+            // See https://github.com/w3c/pointerlock/issues/42.
+            this.InputDelta["MouseX"] = evt.clientX - this.InputState["MouseX"];
+            this.InputDelta["MouseY"] = evt.clientY - this.InputState["MouseY"];
+
             this.InputState["MouseX"] = evt.clientX;
             this.InputState["MouseY"] = evt.clientY;
-            this.InputDelta["MouseX"] = evt.movementX;
-            this.InputDelta["MouseY"] = evt.movementY;
         });
         this.Ui.addEventListener("wheel", (evt) => {
             evt.preventDefault();

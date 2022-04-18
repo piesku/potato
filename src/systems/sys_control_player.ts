@@ -27,8 +27,8 @@ export function sys_control_player(game: Game, delta: number) {
 function update(game: Game, entity: Entity) {
     let entity_transform = game.World.Transform2D[entity];
     if (game.InputDistance["Mouse0"] > 10) {
-        entity_transform.Translation[0] -= game.InputDelta["MouseX"] / UNIT_PX / 2;
-        entity_transform.Translation[1] += game.InputDelta["MouseY"] / UNIT_PX / 2;
+        entity_transform.Translation[0] -= game.InputDelta["MouseX"] / UNIT_PX;
+        entity_transform.Translation[1] += game.InputDelta["MouseY"] / UNIT_PX;
         game.World.Signature[entity] |= Has.Dirty;
     }
 }
