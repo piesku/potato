@@ -88,10 +88,10 @@ this.InputState[`Mouse${evt.button}`] = 0;
 this.InputDelta[`Mouse${evt.button}`] = -1;
 });
 this.Ui.addEventListener("mousemove", (evt) => {
+this.InputDelta["MouseX"] = evt.clientX - this.InputState["MouseX"];
+this.InputDelta["MouseY"] = evt.clientY - this.InputState["MouseY"];
 this.InputState["MouseX"] = evt.clientX;
 this.InputState["MouseY"] = evt.clientY;
-this.InputDelta["MouseX"] = evt.movementX;
-this.InputDelta["MouseY"] = evt.movementY;
 });
 this.Ui.addEventListener("wheel", (evt) => {
 evt.preventDefault();
@@ -211,12 +211,6 @@ FixedUpdate(step2) {
 FrameUpdate(delta) {
 }
 InputReset() {
-for (let name in this.InputDelta) {
-this.InputDelta[name] = 0;
-}
-}
-FrameReset(delta) {
-this.ViewportResized = false;
 if (this.InputDelta["Mouse0"] === -1) {
 this.InputDistance["Mouse0"] = 0;
 }
@@ -232,6 +226,12 @@ this.InputDistance["Touch0"] = 0;
 if (this.InputDelta["Touch1"] === -1) {
 this.InputDistance["Touch1"] = 0;
 }
+for (let name in this.InputDelta) {
+this.InputDelta[name] = 0;
+}
+}
+FrameReset(delta) {
+this.ViewportResized = false;
 let update6 = performance.now() - this.Now;
 if (update_span) {
 update_span.textContent = update6.toFixed(1);
@@ -578,22 +578,24 @@ game2.World.Signature[entity] |= 16 /* Dirty */;
 
 var QUERY3 = 4 /* ControlPlayer */;
 function sys_control_player(game2, delta) {
-if (game2.InputDistance["Mouse0"] > 10) {
+if (game2.InputDelta["Mouse0"] === 1) {
+document.body.classList.add("grabbing");
+} else if (game2.InputDelta["Mouse0"] === -1) {
+document.body.classList.remove("grabbing");
+}
+if (game2.InputDistance["Mouse0"] > 5) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
 if ((game2.World.Signature[i] & QUERY3) === QUERY3) {
 update2(game2, i);
 }
 }
-document.body.classList.add("grabbing");
-} else if (game2.InputDelta["Mouse0"] === -1) {
-document.body.classList.remove("grabbing");
 }
 }
 function update2(game2, entity) {
 let entity_transform = game2.World.Transform2D[entity];
 if (game2.InputDistance["Mouse0"] > 10) {
-entity_transform.Translation[0] -= game2.InputDelta["MouseX"] / UNIT_PX / 2;
-entity_transform.Translation[1] += game2.InputDelta["MouseY"] / UNIT_PX / 2;
+entity_transform.Translation[0] -= game2.InputDelta["MouseX"] / UNIT_PX;
+entity_transform.Translation[1] += game2.InputDelta["MouseY"] / UNIT_PX;
 game2.World.Signature[entity] |= 16 /* Dirty */;
 }
 }
@@ -953,12 +955,12 @@ this.Gl.vertexAttribDivisor(material.Locations.InstanceSprite, 1);
 this.Gl.vertexAttribPointer(material.Locations.InstanceSprite, 4, GL_FLOAT, false, BYTES_PER_INSTANCE, 4 * 12);
 }
 FixedUpdate(delta) {
+sys_control_player(this, delta);
 sys_physics2d_bounds(this, delta);
 sys_physics2d_integrate(this, delta);
 sys_transform2d(this, delta);
 }
 FrameUpdate(delta) {
-sys_control_player(this, delta);
 sys_control_always2d(this, delta);
 sys_move2d(this, delta);
 sys_resize2d(this, delta);
