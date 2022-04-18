@@ -3,6 +3,7 @@ import {instantiate} from "../../common/game.js";
 import {orthographic} from "../../common/projection.js";
 import {float} from "../../common/random.js";
 import {camera_canvas} from "../components/com_camera.js";
+import {control_player} from "../components/com_control_player.js";
 import {order, render2d} from "../components/com_render2d.js";
 import {RigidKind, rigid_body2d} from "../components/com_rigid_body2d.js";
 import {transform2d} from "../components/com_transform2d.js";
@@ -14,7 +15,11 @@ export function scene_stage(game: Game) {
     game.ViewportResized = true;
 
     // Camera.
-    instantiate(game, [transform2d([0, 0]), camera_canvas(orthographic(5, 1, 3))]);
+    instantiate(game, [
+        transform2d([0, 0]),
+        camera_canvas(orthographic(5, 1, 3)),
+        control_player(),
+    ]);
 
     let dynamic_count = 5_000;
 
