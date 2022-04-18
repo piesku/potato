@@ -174,6 +174,7 @@
         while (accumulator >= step) {
           accumulator -= step;
           this.FixedUpdate(step);
+          this.InputReset();
         }
         this.FrameUpdate(delta);
         this.FrameReset(delta);
@@ -209,6 +210,11 @@
     }
     FrameUpdate(delta) {
     }
+    InputReset() {
+      for (let name in this.InputDelta) {
+        this.InputDelta[name] = 0;
+      }
+    }
     FrameReset(delta) {
       this.ViewportResized = false;
       if (this.InputDelta["Mouse0"] === -1) {
@@ -226,12 +232,9 @@
       if (this.InputDelta["Touch1"] === -1) {
         this.InputDistance["Touch1"] = 0;
       }
-      for (let name in this.InputDelta) {
-        this.InputDelta[name] = 0;
-      }
-      let update5 = performance.now() - this.Now;
+      let update6 = performance.now() - this.Now;
       if (update_span) {
-        update_span.textContent = update5.toFixed(1);
+        update_span.textContent = update6.toFixed(1);
       }
       if (delta_span) {
         delta_span.textContent = (delta * 1e3).toFixed(1);
@@ -254,10 +257,6 @@
       this.Gl.enable(GL_DEPTH_TEST);
       this.Gl.enable(GL_CULL_FACE);
       this.Gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-    FrameSetup(delta) {
-      super.FrameSetup(delta);
-      this.Cameras = [];
     }
   };
   function instantiate(game2, blueprint) {
@@ -528,6 +527,7 @@
   var QUERY = 256 /* Transform2D */ | 1 /* Camera */;
   var CAMERA_Z = 2;
   function sys_camera2d(game2, delta) {
+    game2.Cameras = [];
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY) === QUERY) {
         let camera = game2.World.Camera[i];
@@ -575,6 +575,29 @@
     }
   }
 
+  // ../src/systems/sys_control_player.ts
+  var QUERY3 = 4 /* ControlPlayer */;
+  function sys_control_player(game2, delta) {
+    if (game2.InputDistance["Mouse0"] > 10) {
+      for (let i = 0; i < game2.World.Signature.length; i++) {
+        if ((game2.World.Signature[i] & QUERY3) === QUERY3) {
+          update2(game2, i);
+        }
+      }
+      document.body.classList.add("grabbing");
+    } else if (game2.InputDelta["Mouse0"] === -1) {
+      document.body.classList.remove("grabbing");
+    }
+  }
+  function update2(game2, entity) {
+    let entity_transform = game2.World.Transform2D[entity];
+    if (game2.InputDistance["Mouse0"] > 10) {
+      entity_transform.Translation[0] -= game2.InputDelta["MouseX"] / UNIT_PX / 2;
+      entity_transform.Translation[1] += game2.InputDelta["MouseY"] / UNIT_PX / 2;
+      game2.World.Signature[entity] |= 16 /* Dirty */;
+    }
+  }
+
   // ../common/vec2.ts
   function set(out, x, y) {
     out[0] = x;
@@ -614,16 +637,16 @@
   }
 
   // ../src/systems/sys_move2d.ts
-  var QUERY3 = 256 /* Transform2D */ | 32 /* Move2D */ | 16 /* Dirty */;
+  var QUERY4 = 256 /* Transform2D */ | 32 /* Move2D */ | 16 /* Dirty */;
   function sys_move2d(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY3) === QUERY3) {
-        update2(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY4) === QUERY4) {
+        update3(game2, i, delta);
       }
     }
   }
   var direction = [0, 0];
-  function update2(game2, entity, delta) {
+  function update3(game2, entity, delta) {
     let transform = game2.World.Transform2D[entity];
     let move = game2.World.Move2D[entity];
     if (move.Direction[0] || move.Direction[1]) {
@@ -672,15 +695,15 @@
   }
 
   // ../src/systems/sys_physics2d_bounds.ts
-  var QUERY4 = 256 /* Transform2D */ | 128 /* RigidBody2D */;
+  var QUERY5 = 256 /* Transform2D */ | 128 /* RigidBody2D */;
   function sys_physics2d_bounds(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY4) === QUERY4) {
-        update3(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY5) === QUERY5) {
+        update4(game2, i, delta);
       }
     }
   }
-  function update3(game2, entity, delta) {
+  function update4(game2, entity, delta) {
     let transform = game2.World.Transform2D[entity];
     let rigid_body = game2.World.RigidBody2D[entity];
     if (rigid_body.Kind === 1 /* Dynamic */) {
@@ -703,16 +726,16 @@
   }
 
   // ../src/systems/sys_physics2d_integrate.ts
-  var QUERY5 = 256 /* Transform2D */ | 128 /* RigidBody2D */;
+  var QUERY6 = 256 /* Transform2D */ | 128 /* RigidBody2D */;
   var GRAVITY = -9.81;
   function sys_physics2d_integrate(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY5) === QUERY5) {
-        update4(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
+        update5(game2, i, delta);
       }
     }
   }
-  function update4(game2, entity, delta) {
+  function update5(game2, entity, delta) {
     let transform = game2.World.Transform2D[entity];
     let rigid_body = game2.World.RigidBody2D[entity];
     if (rigid_body.Kind === 1 /* Dynamic */) {
@@ -782,7 +805,7 @@
   }
 
   // ../src/systems/sys_resize2d.ts
-  var QUERY6 = 1 /* Camera */;
+  var QUERY7 = 1 /* Camera */;
   function sys_resize2d(game2, delta) {
     if (game2.ViewportWidth != window.innerWidth || game2.ViewportHeight != window.innerHeight) {
       game2.ViewportResized = true;
@@ -791,7 +814,7 @@
       game2.ViewportWidth = game2.Canvas3D.width = game2.Canvas2D.width = window.innerWidth;
       game2.ViewportHeight = game2.Canvas3D.height = game2.Canvas2D.height = window.innerHeight;
       for (let i = 0; i < game2.World.Signature.length; i++) {
-        if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
+        if ((game2.World.Signature[i] & QUERY7) === QUERY7) {
           let camera = game2.World.Camera[i];
           if (camera.Kind == 0 /* Canvas */ && camera.Projection.Kind == 1 /* Orthographic */) {
             camera.Projection.Radius = game2.ViewportHeight / UNIT_PX / 2;
@@ -857,10 +880,10 @@
   var RAD_TO_DEG = 180 / Math.PI;
 
   // ../src/systems/sys_transform2d.ts
-  var QUERY7 = 256 /* Transform2D */ | 16 /* Dirty */;
+  var QUERY8 = 256 /* Transform2D */ | 16 /* Dirty */;
   function sys_transform2d(game2, delta) {
     for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-      if ((game2.World.Signature[ent] & QUERY7) === QUERY7) {
+      if ((game2.World.Signature[ent] & QUERY8) === QUERY8) {
         let transform = game2.World.Transform2D[ent];
         update_transform(game2.World, ent, transform);
       }
@@ -897,7 +920,7 @@
   var FLOATS_PER_INSTANCE = 16;
   var BYTES_PER_INSTANCE = FLOATS_PER_INSTANCE * 4;
   var UNIT_PX = 32;
-  var Game4 = class extends Game3D {
+  var Game5 = class extends Game3D {
     constructor() {
       super();
       this.World = new World(WORLD_CAPACITY);
@@ -929,14 +952,17 @@
       this.Gl.vertexAttribDivisor(material.Locations.InstanceSprite, 1);
       this.Gl.vertexAttribPointer(material.Locations.InstanceSprite, 4, GL_FLOAT, false, BYTES_PER_INSTANCE, 4 * 12);
     }
-    FrameUpdate(delta) {
-      sys_resize2d(this, delta);
-      sys_camera2d(this, delta);
-      sys_control_always2d(this, delta);
-      sys_move2d(this, delta);
+    FixedUpdate(delta) {
+      sys_physics2d_bounds(this, delta);
       sys_physics2d_integrate(this, delta);
       sys_transform2d(this, delta);
-      sys_physics2d_bounds(this, delta);
+    }
+    FrameUpdate(delta) {
+      sys_control_player(this, delta);
+      sys_control_always2d(this, delta);
+      sys_move2d(this, delta);
+      sys_resize2d(this, delta);
+      sys_camera2d(this, delta);
       sys_render2d(this, delta);
     }
   };
@@ -984,6 +1010,14 @@
       default:
         return [v, p, q, a];
     }
+  }
+
+  // ../src/components/com_control_player.ts
+  function control_player() {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 4 /* ControlPlayer */;
+      game2.World.ControlPlayer[entity] = {};
+    };
   }
 
   // ../src/components/com_render2d.ts
@@ -1034,7 +1068,11 @@
   function scene_stage(game2) {
     game2.World = new World(WORLD_CAPACITY);
     game2.ViewportResized = true;
-    instantiate(game2, [transform2d([0, 0]), camera_canvas(orthographic(5, 1, 3))]);
+    instantiate(game2, [
+      transform2d([0, 0]),
+      camera_canvas(orthographic(5, 1, 3)),
+      control_player()
+    ]);
     let dynamic_count = 5e3;
     for (let i = 0; i < dynamic_count; i++) {
       instantiate(game2, [
@@ -1053,7 +1091,7 @@
   }
 
   // ../src/index.ts
-  var game = new Game4();
+  var game = new Game5();
   window.game = game;
   Promise.all([load_texture(game, "checker1.png"), load_texture(game, "spritesheet.png")]).then(() => {
     scene_stage(game);
