@@ -1090,17 +1090,19 @@ transform2d([0, 0]),
 camera_canvas(orthographic(5, 1, 3)),
 control_player()
 ]);
+instantiate(game2, [transform2d([-6, 0], 0, [4, 3]), render2d([4, 2.33], [0, 0]), order(1)]);
+instantiate(game2, [transform2d([6, 0], 0, [4, 3]), render2d([4, 2.33], [0, 1]), order(1)]);
 let dynamic_count = 5e3;
 for (let i = 0; i < dynamic_count; i++) {
 instantiate(game2, [
-transform2d([float(-10, -3), float(10, 100)], 0),
-render2d([8, 8], [0, 0], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
+transform2d([float(-8, -4), float(10, 100)], 0),
+render2d([16, 7], [0, 6], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
 order(1 - i / dynamic_count),
 rigid_body2d(1 /* Dynamic */, float(0.99, 0.999))
 ]);
 instantiate(game2, [
-transform2d([float(3, 10), float(10, 100)], 0),
-render2d([8, 8], [1, 0], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
+transform2d([float(4, 8), float(10, 100)], 0),
+render2d([16, 7], [1, 6], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
 order(1 - i / dynamic_count),
 rigid_body2d(1 /* Dynamic */, float(0.99, 0.999))
 ]);
