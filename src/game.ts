@@ -9,7 +9,7 @@ import {
 import {mat_instanced2d} from "./materials/mat_instanced2d.js";
 import {sys_camera2d} from "./systems/sys_camera2d.js";
 import {sys_control_always2d} from "./systems/sys_control_always2d.js";
-import {sys_control_player} from "./systems/sys_control_player.js";
+import {sys_control_camera} from "./systems/sys_control_camera.js";
 import {sys_move2d} from "./systems/sys_move2d.js";
 import {sys_physics2d_bounds} from "./systems/sys_physics2d_bounds.js";
 import {sys_physics2d_integrate} from "./systems/sys_physics2d_integrate.js";
@@ -122,7 +122,7 @@ export class Game extends Game3D {
     }
 
     override FixedUpdate(delta: number) {
-        sys_control_player(this, delta);
+        sys_control_camera(this, delta);
 
         sys_physics2d_bounds(this, delta);
         sys_physics2d_integrate(this, delta);

@@ -1,16 +1,12 @@
-/**
- * @module systems/sys_control_player
- */
-
 import {clamp} from "../../common/number.js";
 import {Entity} from "../../common/world.js";
 import {BASE_UNIT_SIZE, Game} from "../game.js";
 import {Has} from "../world.js";
 
-const QUERY = Has.ControlPlayer;
+const QUERY = Has.Camera | Has.ControlPlayer;
 let wheel_y_clamped = 0;
 
-export function sys_control_player(game: Game, delta: number) {
+export function sys_control_camera(game: Game, delta: number) {
     if (game.InputDelta["Mouse0"] === 1) {
         document.body.classList.add("grabbing");
     } else if (game.InputDelta["Mouse0"] === -1) {
