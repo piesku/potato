@@ -362,6 +362,18 @@ InstanceSprite: gl.getAttribLocation(program, "attr_sprite")
 }
 
 
+function transform_position(out, a, m) {
+let x = a[0];
+let y = a[1];
+let z = a[2];
+let w = m[3] * x + m[7] * y + m[11] * z + m[15] || 1;
+out[0] = (m[0] * x + m[4] * y + m[8] * z + m[12]) / w;
+out[1] = (m[1] * x + m[5] * y + m[9] * z + m[13]) / w;
+out[2] = (m[2] * x + m[6] * y + m[10] * z + m[14]) / w;
+return out;
+}
+
+
 function create() {
 return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 }
@@ -523,7 +535,7 @@ ClearMask: clear_mask
 }
 
 
-var QUERY = 256 /* Transform2D */ | 1 /* Camera */;
+var QUERY = 512 /* Transform2D */ | 1 /* Camera */;
 var CAMERA_Z = 2;
 function sys_camera2d(game2, delta) {
 game2.Cameras = [];
@@ -552,7 +564,7 @@ game2.Cameras.push(i);
 }
 
 
-var QUERY2 = 2 /* ControlAlways2D */ | 32 /* Move2D */;
+var QUERY2 = 2 /* ControlAlways2D */ | 64 /* Move2D */;
 function sys_control_always2d(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
 if ((game2.World.Signature[i] & QUERY2) === QUERY2) {
@@ -580,14 +592,9 @@ return Math.max(min, Math.min(max, num));
 }
 
 
-var QUERY3 = 4 /* ControlPlayer */;
+var QUERY3 = 1 /* Camera */ | 4 /* ControlPlayer */;
 var wheel_y_clamped = 0;
-function sys_control_player(game2, delta) {
-if (game2.InputDelta["Mouse0"] === 1) {
-document.body.classList.add("grabbing");
-} else if (game2.InputDelta["Mouse0"] === -1) {
-document.body.classList.remove("grabbing");
-}
+function sys_control_camera(game2, delta) {
 if (game2.InputDelta["WheelY"]) {
 wheel_y_clamped = clamp(-500, 500, wheel_y_clamped + game2.InputDelta["WheelY"]);
 let zoom = 4 ** (wheel_y_clamped / -500);
@@ -596,6 +603,14 @@ zoom = 1;
 }
 game2.UnitSize = BASE_UNIT_SIZE * zoom;
 game2.ViewportResized = true;
+}
+if (game2.DraggedEntity !== null) {
+return;
+}
+if (game2.InputDelta["Mouse0"] === 1) {
+document.body.classList.add("grabbing");
+} else if (game2.InputDelta["Mouse0"] === -1) {
+document.body.classList.remove("grabbing");
 }
 if (game2.InputDistance["Mouse0"] > 5) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
@@ -620,9 +635,19 @@ out[0] = x;
 out[1] = y;
 return out;
 }
+function copy(out, a) {
+out[0] = a[0];
+out[1] = a[1];
+return out;
+}
 function add(out, a, b) {
 out[0] = a[0] + b[0];
 out[1] = a[1] + b[1];
+return out;
+}
+function subtract(out, a, b) {
+out[0] = a[0] - b[0];
+out[1] = a[1] - b[1];
 return out;
 }
 function scale(out, a, b) {
@@ -653,194 +678,20 @@ return Math.hypot(a[0], a[1]);
 }
 
 
-var QUERY4 = 256 /* Transform2D */ | 32 /* Move2D */ | 16 /* Dirty */;
-function sys_move2d(game2, delta) {
-for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY4) === QUERY4) {
-update3(game2, i, delta);
+function sys_control_drag(game2, delta) {
+if (game2.DraggedEntity === null) {
+return;
 }
+let entity = game2.DraggedEntity;
+if (game2.InputDelta["Mouse0"] === -1) {
+document.body.classList.remove("grabbing");
+game2.DraggedEntity = null;
+return;
 }
-}
-var direction = [0, 0];
-function update3(game2, entity, delta) {
-let transform = game2.World.Transform2D[entity];
-let move = game2.World.Move2D[entity];
-if (move.Direction[0] || move.Direction[1]) {
-direction[0] = move.Direction[0];
-direction[1] = move.Direction[1];
-let amount = Math.min(1, length(direction));
-if (transform.Parent !== void 0) {
-let parent = game2.World.Transform2D[transform.Parent];
-transform_direction(direction, direction, parent.Self);
-} else {
-transform_direction(direction, direction, transform.World);
-}
-normalize2(direction, direction);
-scale(direction, direction, amount * move.MoveSpeed * delta);
-add(transform.Translation, transform.Translation, direction);
-move.Direction[0] = 0;
-move.Direction[1] = 0;
-}
-if (move.Rotation) {
-transform.Rotation += move.Rotation * move.RotationSpeed * delta;
-move.Rotation = 0;
-}
-}
-
-
-var seed = 1;
-function rand() {
-seed = seed * 16807 % 2147483647;
-return (seed - 1) / 2147483646;
-}
-function float(min = 0, max = 1) {
-return rand() * (max - min) + min;
-}
-
-
-function rigid_body2d(kind, friction) {
-return (game2, entity) => {
-game2.World.Signature[entity] |= 128 /* RigidBody2D */;
-game2.World.RigidBody2D[entity] = {
-Kind: kind,
-Friction: friction,
-Acceleration: [0, 0],
-VelocityIntegrated: [0, 0]
-};
-};
-}
-
-
-var QUERY5 = 256 /* Transform2D */ | 128 /* RigidBody2D */;
-function sys_physics2d_bounds(game2, delta) {
-for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY5) === QUERY5) {
-update4(game2, i, delta);
-}
-}
-}
-function update4(game2, entity, delta) {
-let transform = game2.World.Transform2D[entity];
-let rigid_body = game2.World.RigidBody2D[entity];
-if (rigid_body.Kind === 1 /* Dynamic */) {
-let bottom = -game2.ViewportHeight / game2.UnitSize / 2;
-let left = -game2.ViewportWidth / game2.UnitSize / 2;
-if (transform.Translation[1] < bottom) {
-transform.Translation[1] = bottom;
-rigid_body.VelocityIntegrated[0] = float(-3, 3);
-rigid_body.VelocityIntegrated[1] *= float(-1.1, -1);
-}
-if (transform.Translation[0] < left) {
-transform.Translation[0] = left;
-rigid_body.VelocityIntegrated[0] *= -1;
-}
-if (transform.Translation[0] > -left) {
-transform.Translation[0] = -left;
-rigid_body.VelocityIntegrated[0] *= -1;
-}
-}
-}
-
-
-var QUERY6 = 256 /* Transform2D */ | 128 /* RigidBody2D */;
-var GRAVITY = -9.81;
-function sys_physics2d_integrate(game2, delta) {
-for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
-update5(game2, i, delta);
-}
-}
-}
-function update5(game2, entity, delta) {
-let transform = game2.World.Transform2D[entity];
-let rigid_body = game2.World.RigidBody2D[entity];
-if (rigid_body.Kind === 1 /* Dynamic */) {
-rigid_body.VelocityIntegrated[1] += GRAVITY * delta;
-scale(rigid_body.Acceleration, rigid_body.Acceleration, delta);
-add(rigid_body.VelocityIntegrated, rigid_body.VelocityIntegrated, rigid_body.Acceleration);
-scale(rigid_body.VelocityIntegrated, rigid_body.VelocityIntegrated, rigid_body.Friction);
-let vel_delta = [0, 0];
-scale(vel_delta, rigid_body.VelocityIntegrated, delta);
-add(transform.Translation, transform.Translation, vel_delta);
+let entity_transform = game2.World.Transform2D[entity];
+copy(entity_transform.Translation, game2.PointerPosition);
+subtract(entity_transform.Translation, entity_transform.Translation, game2.PointerOffset);
 game2.World.Signature[entity] |= 16 /* Dirty */;
-set(rigid_body.Acceleration, 0, 0);
-}
-}
-
-
-function sys_render2d(game2, delta) {
-for (let i = 0; i < game2.World.Signature.length; i++) {
-let offset = i * FLOATS_PER_INSTANCE + 7;
-if (game2.World.Signature[i] & 64 /* Render2D */) {
-if (game2.InstanceData[offset] == 0) {
-game2.InstanceData[offset] = 1;
-}
-} else if (game2.InstanceData[offset] == 1) {
-game2.InstanceData[offset] = 0;
-}
-}
-for (let camera_entity of game2.Cameras) {
-let camera = game2.World.Camera[camera_entity];
-switch (camera.Kind) {
-case 0 /* Canvas */:
-game2.Gl.bindFramebuffer(GL_FRAMEBUFFER, null);
-game2.Gl.viewport(0, 0, game2.ViewportWidth, game2.ViewportHeight);
-game2.Gl.clearColor(...camera.ClearColor);
-game2.Gl.clear(camera.ClearMask);
-render_all(game2, camera);
-break;
-}
-}
-}
-function render_all(game2, eye) {
-let material = game2.MaterialInstanced;
-game2.Gl.useProgram(material.Program);
-game2.Gl.uniformMatrix4fv(material.Locations.Pv, false, eye.Pv);
-game2.Gl.activeTexture(GL_TEXTURE0);
-game2.Gl.bindTexture(GL_TEXTURE_2D, game2.Textures["spritesheet.png"]);
-game2.Gl.uniform1i(material.Locations.SpriteSheet, 0);
-game2.Gl.bindBuffer(GL_ARRAY_BUFFER, game2.InstanceBuffer);
-game2.Gl.bufferData(GL_ARRAY_BUFFER, game2.InstanceData, GL_STREAM_DRAW);
-game2.Gl.drawArraysInstanced(material.Mode, 0, 4, game2.World.Signature.length);
-}
-
-
-function orthographic(radius, near, far) {
-return {
-Kind: 1 /* Orthographic */,
-Radius: radius,
-Near: near,
-Far: far,
-Projection: create(),
-Inverse: create()
-};
-}
-function resize_ortho_constant(projection, aspect) {
-from_ortho(projection.Projection, projection.Radius, projection.Radius * aspect, -projection.Radius, -projection.Radius * aspect, projection.Near, projection.Far);
-invert(projection.Inverse, projection.Projection);
-}
-
-
-var QUERY7 = 1 /* Camera */;
-function sys_resize2d(game2, delta) {
-if (game2.ViewportWidth != window.innerWidth || game2.ViewportHeight != window.innerHeight) {
-game2.ViewportResized = true;
-}
-if (game2.ViewportResized) {
-game2.ViewportWidth = game2.Canvas3D.width = game2.Canvas2D.width = window.innerWidth;
-game2.ViewportHeight = game2.Canvas3D.height = game2.Canvas2D.height = window.innerHeight;
-for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY7) === QUERY7) {
-let camera = game2.World.Camera[i];
-if (camera.Kind == 0 /* Canvas */ && camera.Projection.Kind == 1 /* Orthographic */) {
-camera.Projection.Radius = game2.ViewportHeight / game2.UnitSize / 2;
-let aspect = game2.ViewportWidth / game2.ViewportHeight;
-resize_ortho_constant(camera.Projection, aspect);
-break;
-}
-}
-}
-}
 }
 
 
@@ -890,22 +741,271 @@ out[0] = a[4];
 out[1] = a[5];
 return out;
 }
+function transform_point(out, a, m) {
+let x = a[0];
+let y = a[1];
+out[0] = m[0] * x + m[2] * y + m[4];
+out[1] = m[1] * x + m[3] * y + m[5];
+return out;
+}
+
+
+var QUERY4 = 32 /* Grabbable */ | 512 /* Transform2D */;
+function sys_control_grab(game2, delta) {
+let camera_entity = game2.Cameras[0];
+if (camera_entity === void 0) {
+return;
+}
+let camera = game2.World.Camera[camera_entity];
+if (camera.Kind === 2 /* Xr */) {
+throw new Error("XR not implemented");
+}
+let x_ndc = game2.InputState["MouseX"] / game2.ViewportWidth * 2 - 1;
+let y_ndc = -(game2.InputState["MouseY"] / game2.ViewportHeight) * 2 + 1;
+let pointer3d = [x_ndc, y_ndc, 0];
+transform_position(pointer3d, pointer3d, camera.Projection.Inverse);
+let camera_transform = game2.World.Transform2D[camera_entity];
+let pointer2d = [pointer3d[0], pointer3d[1]];
+transform_point(game2.PointerPosition, pointer2d, camera_transform.World);
+let hovered = null;
+for (let ent = 0; ent < game2.World.Signature.length; ent++) {
+if ((game2.World.Signature[ent] & QUERY4) === QUERY4) {
+let entity_transform = game2.World.Transform2D[ent];
+if (is_pointer_over(game2.PointerPosition, entity_transform)) {
+hovered = ent;
+break;
+}
+}
+}
+if (hovered !== null) {
+document.body.classList.add("grab");
+if (game2.InputDelta["Mouse0"] === 1) {
+document.body.classList.add("grabbing");
+game2.DraggedEntity = hovered;
+let dragged_transform = game2.World.Transform2D[hovered];
+subtract(game2.PointerOffset, game2.PointerPosition, dragged_transform.Translation);
+}
+} else {
+document.body.classList.remove("grab");
+}
+}
+var world_position = [0, 0];
+var bounds_world = [0, 0, 0, 0];
+function is_pointer_over(pointer_world_position, entity_transform) {
+get_translation(world_position, entity_transform.World);
+bounds_world[0] = world_position[0] - entity_transform.Scale[0] / 2;
+bounds_world[1] = world_position[0] + entity_transform.Scale[0] / 2;
+bounds_world[2] = world_position[1] - entity_transform.Scale[1] / 2;
+bounds_world[3] = world_position[1] + entity_transform.Scale[1] / 2;
+return pointer_world_position[0] > bounds_world[0] && pointer_world_position[0] < bounds_world[1] && pointer_world_position[1] > bounds_world[2] && pointer_world_position[1] < bounds_world[3];
+}
+
+
+var QUERY5 = 512 /* Transform2D */ | 64 /* Move2D */ | 16 /* Dirty */;
+function sys_move2d(game2, delta) {
+for (let i = 0; i < game2.World.Signature.length; i++) {
+if ((game2.World.Signature[i] & QUERY5) === QUERY5) {
+update3(game2, i, delta);
+}
+}
+}
+var direction = [0, 0];
+function update3(game2, entity, delta) {
+let transform = game2.World.Transform2D[entity];
+let move = game2.World.Move2D[entity];
+if (move.Direction[0] || move.Direction[1]) {
+direction[0] = move.Direction[0];
+direction[1] = move.Direction[1];
+let amount = Math.min(1, length(direction));
+if (transform.Parent !== void 0) {
+let parent = game2.World.Transform2D[transform.Parent];
+transform_direction(direction, direction, parent.Self);
+} else {
+transform_direction(direction, direction, transform.World);
+}
+normalize2(direction, direction);
+scale(direction, direction, amount * move.MoveSpeed * delta);
+add(transform.Translation, transform.Translation, direction);
+move.Direction[0] = 0;
+move.Direction[1] = 0;
+}
+if (move.Rotation) {
+transform.Rotation += move.Rotation * move.RotationSpeed * delta;
+move.Rotation = 0;
+}
+}
+
+
+var seed = 1;
+function rand() {
+seed = seed * 16807 % 2147483647;
+return (seed - 1) / 2147483646;
+}
+function float(min = 0, max = 1) {
+return rand() * (max - min) + min;
+}
+
+
+function rigid_body2d(kind, friction) {
+return (game2, entity) => {
+game2.World.Signature[entity] |= 256 /* RigidBody2D */;
+game2.World.RigidBody2D[entity] = {
+Kind: kind,
+Friction: friction,
+Acceleration: [0, 0],
+VelocityIntegrated: [0, 0]
+};
+};
+}
+
+
+var QUERY6 = 512 /* Transform2D */ | 256 /* RigidBody2D */;
+function sys_physics2d_bounds(game2, delta) {
+for (let i = 0; i < game2.World.Signature.length; i++) {
+if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
+update4(game2, i, delta);
+}
+}
+}
+function update4(game2, entity, delta) {
+let transform = game2.World.Transform2D[entity];
+let rigid_body = game2.World.RigidBody2D[entity];
+if (rigid_body.Kind === 1 /* Dynamic */) {
+let bottom = -game2.ViewportHeight / game2.UnitSize / 2;
+let left = -game2.ViewportWidth / game2.UnitSize / 2;
+if (transform.Translation[1] < bottom) {
+transform.Translation[1] = bottom;
+rigid_body.VelocityIntegrated[0] = float(-3, 3);
+rigid_body.VelocityIntegrated[1] *= float(-1.1, -1);
+}
+if (transform.Translation[0] < left) {
+transform.Translation[0] = left;
+rigid_body.VelocityIntegrated[0] *= -1;
+}
+if (transform.Translation[0] > -left) {
+transform.Translation[0] = -left;
+rigid_body.VelocityIntegrated[0] *= -1;
+}
+}
+}
+
+
+var QUERY7 = 512 /* Transform2D */ | 256 /* RigidBody2D */;
+var GRAVITY = -9.81;
+function sys_physics2d_integrate(game2, delta) {
+for (let i = 0; i < game2.World.Signature.length; i++) {
+if ((game2.World.Signature[i] & QUERY7) === QUERY7) {
+update5(game2, i, delta);
+}
+}
+}
+function update5(game2, entity, delta) {
+let transform = game2.World.Transform2D[entity];
+let rigid_body = game2.World.RigidBody2D[entity];
+if (rigid_body.Kind === 1 /* Dynamic */) {
+rigid_body.VelocityIntegrated[1] += GRAVITY * delta;
+scale(rigid_body.Acceleration, rigid_body.Acceleration, delta);
+add(rigid_body.VelocityIntegrated, rigid_body.VelocityIntegrated, rigid_body.Acceleration);
+scale(rigid_body.VelocityIntegrated, rigid_body.VelocityIntegrated, rigid_body.Friction);
+let vel_delta = [0, 0];
+scale(vel_delta, rigid_body.VelocityIntegrated, delta);
+add(transform.Translation, transform.Translation, vel_delta);
+game2.World.Signature[entity] |= 16 /* Dirty */;
+set(rigid_body.Acceleration, 0, 0);
+}
+}
+
+
+function sys_render2d(game2, delta) {
+for (let i = 0; i < game2.World.Signature.length; i++) {
+let offset = i * FLOATS_PER_INSTANCE + 7;
+if (game2.World.Signature[i] & 128 /* Render2D */) {
+if (game2.InstanceData[offset] == 0) {
+game2.InstanceData[offset] = 1;
+}
+} else if (game2.InstanceData[offset] == 1) {
+game2.InstanceData[offset] = 0;
+}
+}
+for (let camera_entity of game2.Cameras) {
+let camera = game2.World.Camera[camera_entity];
+switch (camera.Kind) {
+case 0 /* Canvas */:
+game2.Gl.bindFramebuffer(GL_FRAMEBUFFER, null);
+game2.Gl.viewport(0, 0, game2.ViewportWidth, game2.ViewportHeight);
+game2.Gl.clearColor(...camera.ClearColor);
+game2.Gl.clear(camera.ClearMask);
+render_all(game2, camera);
+break;
+}
+}
+}
+function render_all(game2, eye) {
+let material = game2.MaterialInstanced;
+game2.Gl.useProgram(material.Program);
+game2.Gl.uniformMatrix4fv(material.Locations.Pv, false, eye.Pv);
+game2.Gl.activeTexture(GL_TEXTURE0);
+game2.Gl.bindTexture(GL_TEXTURE_2D, game2.Textures["spritesheet.png"]);
+game2.Gl.uniform1i(material.Locations.SpriteSheet, 0);
+game2.Gl.bindBuffer(GL_ARRAY_BUFFER, game2.InstanceBuffer);
+game2.Gl.bufferData(GL_ARRAY_BUFFER, game2.InstanceData, GL_STREAM_DRAW);
+game2.Gl.drawArraysInstanced(material.Mode, 0, 4, game2.World.Signature.length);
+}
+
+
+function orthographic(radius, near, far) {
+return {
+Kind: 1 /* Orthographic */,
+Radius: radius,
+Near: near,
+Far: far,
+Projection: create(),
+Inverse: create()
+};
+}
+function resize_ortho_constant(projection, aspect) {
+from_ortho(projection.Projection, projection.Radius, projection.Radius * aspect, -projection.Radius, -projection.Radius * aspect, projection.Near, projection.Far);
+invert(projection.Inverse, projection.Projection);
+}
+
+
+var QUERY8 = 1 /* Camera */;
+function sys_resize2d(game2, delta) {
+if (game2.ViewportWidth != window.innerWidth || game2.ViewportHeight != window.innerHeight) {
+game2.ViewportResized = true;
+}
+if (game2.ViewportResized) {
+game2.ViewportWidth = game2.Canvas3D.width = game2.Canvas2D.width = window.innerWidth;
+game2.ViewportHeight = game2.Canvas3D.height = game2.Canvas2D.height = window.innerHeight;
+for (let i = 0; i < game2.World.Signature.length; i++) {
+if ((game2.World.Signature[i] & QUERY8) === QUERY8) {
+let camera = game2.World.Camera[i];
+if (camera.Kind == 0 /* Canvas */ && camera.Projection.Kind == 1 /* Orthographic */) {
+camera.Projection.Radius = game2.ViewportHeight / game2.UnitSize / 2;
+let aspect = game2.ViewportWidth / game2.ViewportHeight;
+resize_ortho_constant(camera.Projection, aspect);
+break;
+}
+}
+}
+}
+}
 
 
 var DEG_TO_RAD = Math.PI / 180;
 var RAD_TO_DEG = 180 / Math.PI;
 
 
-var QUERY8 = 256 /* Transform2D */ | 16 /* Dirty */;
+var QUERY9 = 512 /* Transform2D */ | 16 /* Dirty */;
 function sys_transform2d(game2, delta) {
 for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-if ((game2.World.Signature[ent] & QUERY8) === QUERY8) {
+if ((game2.World.Signature[ent] & QUERY9) === QUERY9) {
 let transform = game2.World.Transform2D[ent];
 update_transform(game2.World, ent, transform);
 }
 }
 }
-var world_position = [0, 0];
+var world_position2 = [0, 0];
 function update_transform(world, entity, transform) {
 world.Signature[entity] &= ~16 /* Dirty */;
 compose(transform.World, transform.Translation, transform.Rotation * DEG_TO_RAD, transform.Scale);
@@ -913,8 +1013,8 @@ if (transform.Parent !== void 0) {
 let parent_transform = world.Transform2D[transform.Parent];
 multiply2(transform.World, parent_transform.World, transform.World);
 if (transform.Gyroscope) {
-get_translation(world_position, transform.World);
-compose(transform.World, world_position, transform.Rotation * DEG_TO_RAD, transform.Scale);
+get_translation(world_position2, transform.World);
+compose(transform.World, world_position2, transform.Rotation * DEG_TO_RAD, transform.Scale);
 }
 }
 invert2(transform.Self, transform.World);
@@ -922,7 +1022,7 @@ if (world.Signature[entity] & 8 /* Children */) {
 let children = world.Children[entity];
 for (let i = 0; i < children.Children.length; i++) {
 let child = children.Children[i];
-if (world.Signature[child] & 256 /* Transform2D */) {
+if (world.Signature[child] & 512 /* Transform2D */) {
 let child_transform = world.Transform2D[child];
 child_transform.Parent = entity;
 update_transform(world, child, child_transform);
@@ -932,7 +1032,7 @@ update_transform(world, child, child_transform);
 }
 
 
-var WORLD_CAPACITY = 50001;
+var WORLD_CAPACITY = 50100;
 var FLOATS_PER_INSTANCE = 16;
 var BYTES_PER_INSTANCE = FLOATS_PER_INSTANCE * 4;
 var BASE_UNIT_SIZE = 32;
@@ -943,6 +1043,9 @@ this.World = new World(WORLD_CAPACITY);
 this.MaterialInstanced = mat_instanced2d(this.Gl);
 this.Textures = {};
 this.UnitSize = BASE_UNIT_SIZE;
+this.PointerPosition = [0, 0];
+this.PointerOffset = [0, 0];
+this.DraggedEntity = null;
 this.InstanceData = new Float32Array(this.World.Capacity * FLOATS_PER_INSTANCE);
 this.InstanceBuffer = this.Gl.createBuffer();
 this.Gl.pixelStorei(GL_UNPACK_FLIP_Y_WEBGL, true);
@@ -970,7 +1073,9 @@ this.Gl.vertexAttribDivisor(material.Locations.InstanceSprite, 1);
 this.Gl.vertexAttribPointer(material.Locations.InstanceSprite, 4, GL_FLOAT, false, BYTES_PER_INSTANCE, 4 * 12);
 }
 FixedUpdate(delta) {
-sys_control_player(this, delta);
+sys_control_grab(this, delta);
+sys_control_drag(this, delta);
+sys_control_camera(this, delta);
 sys_physics2d_bounds(this, delta);
 sys_physics2d_integrate(this, delta);
 sys_transform2d(this, delta);
@@ -1038,6 +1143,13 @@ game2.World.ControlPlayer[entity] = {};
 }
 
 
+function grabbable() {
+return (game2, entity) => {
+game2.World.Signature[entity] |= 32 /* Grabbable */;
+};
+}
+
+
 function render2d(sheet_size, sprite_offset, color = [1, 1, 1, 1]) {
 return (game2, entity) => {
 let instance_offset = entity * FLOATS_PER_INSTANCE;
@@ -1051,7 +1163,7 @@ game2.InstanceData[instance_offset + 12] = sprite_offset[0];
 game2.InstanceData[instance_offset + 13] = sheet_size[1] - sprite_offset[1] - 1;
 game2.InstanceData[instance_offset + 14] = sheet_size[0];
 game2.InstanceData[instance_offset + 15] = sheet_size[1];
-game2.World.Signature[entity] |= 64 /* Render2D */;
+game2.World.Signature[entity] |= 128 /* Render2D */;
 game2.World.Render2D[entity] = {
 Detail: game2.InstanceData.subarray(instance_offset + 6, instance_offset + 8),
 Color: game2.InstanceData.subarray(instance_offset + 8, instance_offset + 12),
@@ -1069,7 +1181,7 @@ game2.InstanceData[instance_offset + 6] = z;
 
 function transform2d(translation = [0, 0], rotation = 0, scale2 = [1, 1]) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 256 /* Transform2D */ | 16 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Transform2D */ | 16 /* Dirty */;
 game2.World.Transform2D[entity] = {
 World: game2.InstanceData.subarray(entity * FLOATS_PER_INSTANCE, entity * FLOATS_PER_INSTANCE + 6),
 Self: create2(),
@@ -1090,8 +1202,18 @@ transform2d([0, 0]),
 camera_canvas(orthographic(5, 1, 3)),
 control_player()
 ]);
-instantiate(game2, [transform2d([-6, 0], 0, [4, 3]), render2d([4, 2.33], [0, 0]), order(1)]);
-instantiate(game2, [transform2d([6, 0], 0, [4, 3]), render2d([4, 2.33], [0, 1]), order(1)]);
+instantiate(game2, [
+transform2d([-6, 0], 0, [4, 3]),
+render2d([4, 2.33], [0, 0]),
+order(1),
+grabbable()
+]);
+instantiate(game2, [
+transform2d([6, 0], 0, [4, 3]),
+render2d([4, 2.33], [0, 1]),
+order(1),
+grabbable()
+]);
 let dynamic_count = 5e3;
 for (let i = 0; i < dynamic_count; i++) {
 instantiate(game2, [
