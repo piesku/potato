@@ -4,6 +4,7 @@ import {orthographic} from "../../common/projection.js";
 import {float} from "../../common/random.js";
 import {camera_canvas} from "../components/com_camera.js";
 import {control_player} from "../components/com_control_player.js";
+import {grabbable} from "../components/com_grabbable.js";
 import {order, render2d} from "../components/com_render2d.js";
 import {RigidKind, rigid_body2d} from "../components/com_rigid_body2d.js";
 import {transform2d} from "../components/com_transform2d.js";
@@ -22,10 +23,20 @@ export function scene_stage(game: Game) {
     ]);
 
     // Garnek1.
-    instantiate(game, [transform2d([-6, 0], 0, [4, 3]), render2d([4, 2.33], [0, 0]), order(1)]);
+    instantiate(game, [
+        transform2d([-6, 0], 0, [4, 3]),
+        render2d([4, 2.33], [0, 0]),
+        order(1),
+        grabbable(),
+    ]);
 
     // Garnek2.
-    instantiate(game, [transform2d([6, 0], 0, [4, 3]), render2d([4, 2.33], [0, 1]), order(1)]);
+    instantiate(game, [
+        transform2d([6, 0], 0, [4, 3]),
+        render2d([4, 2.33], [0, 1]),
+        order(1),
+        grabbable(),
+    ]);
 
     let dynamic_count = 5_000;
     for (let i = 0; i < dynamic_count; i++) {

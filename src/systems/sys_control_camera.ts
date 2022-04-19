@@ -7,12 +7,6 @@ const QUERY = Has.Camera | Has.ControlPlayer;
 let wheel_y_clamped = 0;
 
 export function sys_control_camera(game: Game, delta: number) {
-    if (game.InputDelta["Mouse0"] === 1) {
-        document.body.classList.add("grabbing");
-    } else if (game.InputDelta["Mouse0"] === -1) {
-        document.body.classList.remove("grabbing");
-    }
-
     if (game.InputDelta["WheelY"]) {
         wheel_y_clamped = clamp(-500, 500, wheel_y_clamped + game.InputDelta["WheelY"]);
         let zoom = 4 ** (wheel_y_clamped / -500);
@@ -21,6 +15,16 @@ export function sys_control_camera(game: Game, delta: number) {
         }
         game.UnitSize = BASE_UNIT_SIZE * zoom;
         game.ViewportResized = true;
+    }
+
+    if (game.DraggedEntity !== null) {
+        return;
+    }
+
+    if (game.InputDelta["Mouse0"] === 1) {
+        document.body.classList.add("grabbing");
+    } else if (game.InputDelta["Mouse0"] === -1) {
+        document.body.classList.remove("grabbing");
     }
 
     if (game.InputDistance["Mouse0"] > 5) {

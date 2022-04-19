@@ -1,4 +1,5 @@
 import {Game3D} from "../common/game.js";
+import {Vec2} from "../common/math.js";
 import {
     GL_ARRAY_BUFFER,
     GL_FLOAT,
@@ -6,10 +7,13 @@ import {
     GL_STREAM_DRAW,
     GL_UNPACK_FLIP_Y_WEBGL,
 } from "../common/webgl.js";
+import {Entity} from "../common/world.js";
 import {mat_instanced2d} from "./materials/mat_instanced2d.js";
 import {sys_camera2d} from "./systems/sys_camera2d.js";
 import {sys_control_always2d} from "./systems/sys_control_always2d.js";
 import {sys_control_camera} from "./systems/sys_control_camera.js";
+import {sys_control_drag} from "./systems/sys_control_drag.js";
+import {sys_control_grab} from "./systems/sys_control_grab.js";
 import {sys_move2d} from "./systems/sys_move2d.js";
 import {sys_physics2d_bounds} from "./systems/sys_physics2d_bounds.js";
 import {sys_physics2d_integrate} from "./systems/sys_physics2d_integrate.js";
@@ -18,7 +22,7 @@ import {sys_resize2d} from "./systems/sys_resize2d.js";
 import {sys_transform2d} from "./systems/sys_transform2d.js";
 import {World} from "./world.js";
 
-export const WORLD_CAPACITY = 50_001;
+export const WORLD_CAPACITY = 50_100;
 export const FLOATS_PER_INSTANCE = 16;
 export const BYTES_PER_INSTANCE = FLOATS_PER_INSTANCE * 4;
 export const BASE_UNIT_SIZE = 32;
@@ -30,6 +34,10 @@ export class Game extends Game3D {
     Textures: Record<string, WebGLTexture> = {};
 
     UnitSize = BASE_UNIT_SIZE;
+
+    PointerPosition: Vec2 = [0, 0];
+    PointerOffset: Vec2 = [0, 0];
+    DraggedEntity: Entity | null = null;
 
     /**
      * A typed array with instance data, suitable for passing to `gl.bufferData`.
@@ -122,6 +130,8 @@ export class Game extends Game3D {
     }
 
     override FixedUpdate(delta: number) {
+        sys_control_grab(this, delta);
+        sys_control_drag(this, delta);
         sys_control_camera(this, delta);
 
         sys_physics2d_bounds(this, delta);
