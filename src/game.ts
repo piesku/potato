@@ -9,12 +9,14 @@ import {
 import {Entity} from "../common/world.js";
 import {mat_instanced2d} from "./materials/mat_instanced2d.js";
 import {sys_camera2d} from "./systems/sys_camera2d.js";
+import {sys_collide2d} from "./systems/sys_collide2d.js";
 import {sys_control_always2d} from "./systems/sys_control_always2d.js";
 import {sys_control_camera} from "./systems/sys_control_camera.js";
 import {sys_control_grab} from "./systems/sys_control_grab.js";
 import {sys_move2d} from "./systems/sys_move2d.js";
 import {sys_physics2d_bounds} from "./systems/sys_physics2d_bounds.js";
 import {sys_physics2d_integrate} from "./systems/sys_physics2d_integrate.js";
+import {sys_physics2d_resolve} from "./systems/sys_physics2d_resolve.js";
 import {sys_render2d} from "./systems/sys_render2d.js";
 import {sys_resize2d} from "./systems/sys_resize2d.js";
 import {sys_transform2d} from "./systems/sys_transform2d.js";
@@ -131,6 +133,9 @@ export class Game extends Game3D {
 
         sys_physics2d_bounds(this, delta);
         sys_physics2d_integrate(this, delta);
+        sys_transform2d(this, delta);
+        sys_collide2d(this, delta);
+        sys_physics2d_resolve(this, delta);
         sys_transform2d(this, delta);
     }
 
