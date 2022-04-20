@@ -23,34 +23,28 @@ const response_translation: Vec2 = [0, 0];
 const response_velocity: Vec2 = [0, 0];
 
 function update(game: Game, entity: Entity) {
+    let transform = game.World.Transform2D[entity];
     let rigid_body = game.World.RigidBody2D[entity];
     let collide = game.World.Collide2D[entity];
 
-    if (rigid_body.Kind === RigidKind.Dynamic) {
-        let has_collision = false;
+    if (rigid_body.Kind === RigidKind.Dynamic && collide.Dynamic) {
+        if (
+            collide.ContactId !== null &&
+            game.World.Signature[collide.ContactId] & Has.RigidBody2D
+        ) {
+            scale(response_translation, collide.ContactNormal, collide.ContactDepth);
+            add(transform.Translation, transform.Translation, response_translation);
+            game.World.Signature[entity] |= Has.Dirty;
 
-        for (let i = 0; i < collide.Collisions.length; i++) {
-            let collision = collide.Collisions[i];
-            if (game.World.Signature[collision.OtherId] & Has.RigidBody2D) {
-                has_collision = true;
-
-                let transform = game.World.Transform2D[entity];
-                scale(response_translation, collision.Normal, -collision.Depth);
-                add(transform.Translation, transform.Translation, response_translation);
-                game.World.Signature[entity] |= Has.Dirty;
-
-                let other_rigid_body = game.World.RigidBody2D[collision.OtherId];
-                let response_magnitude = dot(rigid_body.VelocityIntegrated, collision.Normal);
-                scale(
-                    response_velocity,
-                    collision.Normal,
-                    -response_magnitude * other_rigid_body.Friction
-                );
-                add(rigid_body.VelocityResolved, rigid_body.VelocityIntegrated, response_velocity);
-            }
-        }
-
-        if (!has_collision) {
+            let other_rigid_body = game.World.RigidBody2D[collide.ContactId];
+            let response_magnitude = dot(rigid_body.VelocityIntegrated, collide.ContactNormal);
+            scale(
+                response_velocity,
+                collide.ContactNormal,
+                -response_magnitude * other_rigid_body.Friction
+            );
+            add(rigid_body.VelocityResolved, rigid_body.VelocityIntegrated, response_velocity);
+        } else {
             copy(rigid_body.VelocityResolved, rigid_body.VelocityIntegrated);
         }
     }

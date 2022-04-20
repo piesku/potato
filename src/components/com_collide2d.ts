@@ -3,32 +3,53 @@ import {Entity} from "../../common/world.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
 
-export interface Collide2D {
+export type Collide2D = Collide2dDynamic | Collide2dStatic;
+
+export interface Collide2dDynamic {
     EntityId: Entity;
-    Dynamic: boolean;
+    Dynamic: true;
     /** The radius of the collider in world units. */
     Radius: number;
     /** The world position of the center. */
     Center: Vec2;
-    /** Other colliders colliding with this collider during this tick. */
-    Collisions: Array<Collision>;
+    ContactId: Entity | null;
+    /* Penetration normal into this collider. */
+    ContactNormal: Vec2;
+    ContactDepth: number;
 }
 
-export interface Collision {
-    OtherId: Entity;
-    Normal: Vec2;
-    Depth: number;
-}
-
-export function collide2d(dynamic: boolean, diameter: number) {
+export function collide2d_dynamic(diameter: number) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.Collide2D;
         game.World.Collide2D[entity] = {
             EntityId: entity,
-            Dynamic: dynamic,
+            Dynamic: true,
             Radius: diameter / 2,
             Center: [0, 0],
-            Collisions: [],
+            ContactId: null,
+            ContactNormal: [0, 0],
+            ContactDepth: 0,
+        };
+    };
+}
+
+export interface Collide2dStatic {
+    EntityId: Entity;
+    Dynamic: false;
+    /** The radius of the collider in world units. */
+    Radius: number;
+    /** The world position of the center. */
+    Center: Vec2;
+}
+
+export function collide2d_static(diameter: number) {
+    return (game: Game, entity: Entity) => {
+        game.World.Signature[entity] |= Has.Collide2D;
+        game.World.Collide2D[entity] = {
+            EntityId: entity,
+            Dynamic: false,
+            Radius: diameter / 2,
+            Center: [0, 0],
         };
     };
 }
