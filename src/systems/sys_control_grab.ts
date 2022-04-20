@@ -1,14 +1,15 @@
 import {get_translation, transform_point} from "../../common/mat2d.js";
 import {Vec2, Vec3, Vec4} from "../../common/math.js";
-import {subtract} from "../../common/vec2.js";
+import {copy, subtract} from "../../common/vec2.js";
 import {transform_position} from "../../common/vec3.js";
-import {Entity} from "../../common/world.js";
 import {CameraKind} from "../components/com_camera.js";
 import {Transform2D} from "../components/com_transform2d.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
 
 const QUERY = Has.Grabbable | Has.Transform2D;
+const pointer_position: Vec2 = [0, 0];
+const pointer_offset: Vec2 = [0, 0];
 
 export function sys_control_grab(game: Game, delta: number) {
     let camera_entity = game.Cameras[0];
@@ -32,32 +33,40 @@ export function sys_control_grab(game: Game, delta: number) {
 
     let camera_transform = game.World.Transform2D[camera_entity];
     let pointer2d: Vec2 = [pointer3d[0], pointer3d[1]];
-    transform_point(game.PointerPosition, pointer2d, camera_transform.World);
+    transform_point(pointer_position, pointer2d, camera_transform.World);
 
-    let hovered: Entity | null = null;
+    if (game.DraggedEntity !== null) {
+        if (game.InputDelta["Mouse0"] === -1) {
+            document.body.classList.remove("grabbing");
+            game.DraggedEntity = null;
+            return;
+        }
+
+        let entity_transform = game.World.Transform2D[game.DraggedEntity];
+        copy(entity_transform.Translation, pointer_position);
+        subtract(entity_transform.Translation, entity_transform.Translation, pointer_offset);
+        game.World.Signature[game.DraggedEntity] |= Has.Dirty;
+        return;
+    }
+
     for (let ent = 0; ent < game.World.Signature.length; ent++) {
         if ((game.World.Signature[ent] & QUERY) === QUERY) {
             let entity_transform = game.World.Transform2D[ent];
-            if (is_pointer_over(game.PointerPosition, entity_transform)) {
-                hovered = ent;
-                break;
+            if (is_pointer_over(pointer_position, entity_transform)) {
+                document.body.classList.add("grab");
+                if (game.InputDelta["Mouse0"] === 1) {
+                    document.body.classList.add("grabbing");
+                    game.DraggedEntity = ent;
+
+                    let dragged_transform = game.World.Transform2D[ent];
+                    subtract(pointer_offset, pointer_position, dragged_transform.Translation);
+                }
+                return;
             }
         }
     }
 
-    if (hovered !== null) {
-        document.body.classList.add("grab");
-
-        if (game.InputDelta["Mouse0"] === 1) {
-            document.body.classList.add("grabbing");
-            game.DraggedEntity = hovered;
-
-            let dragged_transform = game.World.Transform2D[hovered];
-            subtract(game.PointerOffset, game.PointerPosition, dragged_transform.Translation);
-        }
-    } else {
-        document.body.classList.remove("grab");
-    }
+    document.body.classList.remove("grab");
 }
 
 const world_position: Vec2 = [0, 0];

@@ -1,5 +1,4 @@
 import {Game3D} from "../common/game.js";
-import {Vec2} from "../common/math.js";
 import {
     GL_ARRAY_BUFFER,
     GL_FLOAT,
@@ -12,7 +11,6 @@ import {mat_instanced2d} from "./materials/mat_instanced2d.js";
 import {sys_camera2d} from "./systems/sys_camera2d.js";
 import {sys_control_always2d} from "./systems/sys_control_always2d.js";
 import {sys_control_camera} from "./systems/sys_control_camera.js";
-import {sys_control_drag} from "./systems/sys_control_drag.js";
 import {sys_control_grab} from "./systems/sys_control_grab.js";
 import {sys_move2d} from "./systems/sys_move2d.js";
 import {sys_physics2d_bounds} from "./systems/sys_physics2d_bounds.js";
@@ -35,8 +33,6 @@ export class Game extends Game3D {
 
     UnitSize = BASE_UNIT_SIZE;
 
-    PointerPosition: Vec2 = [0, 0];
-    PointerOffset: Vec2 = [0, 0];
     DraggedEntity: Entity | null = null;
 
     /**
@@ -131,7 +127,6 @@ export class Game extends Game3D {
 
     override FixedUpdate(delta: number) {
         sys_control_grab(this, delta);
-        sys_control_drag(this, delta);
         sys_control_camera(this, delta);
 
         sys_physics2d_bounds(this, delta);
