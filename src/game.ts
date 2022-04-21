@@ -1,4 +1,5 @@
 import {Game3D} from "../common/game.js";
+import {Texture} from "../common/texture.js";
 import {
     GL_ARRAY_BUFFER,
     GL_FLOAT,
@@ -31,7 +32,7 @@ export class Game extends Game3D {
     World = new World(WORLD_CAPACITY);
 
     MaterialInstanced = mat_instanced2d(this.Gl);
-    Textures: Record<string, WebGLTexture> = {};
+    Textures: Record<string, Texture> = {};
 
     UnitSize = BASE_UNIT_SIZE;
 
@@ -152,8 +153,8 @@ export class Game extends Game3D {
 
 // prettier-ignore
 let vertex_arr = Float32Array.from([
-    -0.5, -0.5, 0,    0, 0,    // SW
-    0.5, -0.5, 0,     1, 0,    // SE
-    -0.5, 0.5, 0,     0, 1,    // NW
-    0.5, 0.5, 0,      1, 1     // NE
+    -0.5, -0.5, 0,    0, 1,    // SW
+    0.5, -0.5, 0,     1, 1,    // SE
+    -0.5, 0.5, 0,     0, 0,    // NW
+    0.5, 0.5, 0,      1, 0     // NE
 ]);

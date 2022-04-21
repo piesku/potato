@@ -1,4 +1,4 @@
-import {Vec2, Vec4} from "../../common/math.js";
+import {Vec4} from "../../common/math.js";
 import {Entity} from "../../common/world.js";
 import {FLOATS_PER_INSTANCE, Game} from "../game.js";
 import {Has} from "../world.js";
@@ -9,7 +9,7 @@ export interface Render2D {
     Sprite: Float32Array;
 }
 
-export function render2d(sheet_size: Vec2, sprite_offset: Vec2, color: Vec4 = [1, 1, 1, 1]) {
+export function render2d(sprite_xywh: Vec4, color: Vec4 = [1, 1, 1, 1]) {
     return (game: Game, entity: Entity) => {
         let instance_offset = entity * FLOATS_PER_INSTANCE;
         // Detail.
@@ -21,11 +21,10 @@ export function render2d(sheet_size: Vec2, sprite_offset: Vec2, color: Vec4 = [1
         game.InstanceData[instance_offset + 10] = color[2];
         game.InstanceData[instance_offset + 11] = color[3];
         // Sprite.
-        game.InstanceData[instance_offset + 12] = sprite_offset[0];
-        // Flip the Y offset; sprite_offset is +Y=down, while texcoords are +Y=up.
-        game.InstanceData[instance_offset + 13] = sheet_size[1] - sprite_offset[1] - 1;
-        game.InstanceData[instance_offset + 14] = sheet_size[0];
-        game.InstanceData[instance_offset + 15] = sheet_size[1];
+        game.InstanceData[instance_offset + 12] = sprite_xywh[0];
+        game.InstanceData[instance_offset + 13] = sprite_xywh[1];
+        game.InstanceData[instance_offset + 14] = sprite_xywh[2];
+        game.InstanceData[instance_offset + 15] = sprite_xywh[3];
 
         game.World.Signature[entity] |= Has.Render2D;
         game.World.Render2D[entity] = {
