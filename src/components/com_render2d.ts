@@ -1,6 +1,7 @@
 import {Vec4} from "../../common/math.js";
 import {Entity} from "../../common/world.js";
 import {FLOATS_PER_INSTANCE, Game} from "../game.js";
+import * as _spritesheet from "../spritesheet.json";
 import {Has} from "../world.js";
 
 export interface Render2D {
@@ -9,7 +10,16 @@ export interface Render2D {
     Sprite: Float32Array;
 }
 
-export function render2d(sprite_xywh: Vec4, color: Vec4 = [1, 1, 1, 1]) {
+const spritesheet: {
+    [key: string]: {
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+    };
+} = _spritesheet;
+
+export function render2d(sprite_name: string, color: Vec4 = [1, 1, 1, 1]) {
     return (game: Game, entity: Entity) => {
         let instance_offset = entity * FLOATS_PER_INSTANCE;
         // Detail.
@@ -21,10 +31,10 @@ export function render2d(sprite_xywh: Vec4, color: Vec4 = [1, 1, 1, 1]) {
         game.InstanceData[instance_offset + 10] = color[2];
         game.InstanceData[instance_offset + 11] = color[3];
         // Sprite.
-        game.InstanceData[instance_offset + 12] = sprite_xywh[0];
-        game.InstanceData[instance_offset + 13] = sprite_xywh[1];
-        game.InstanceData[instance_offset + 14] = sprite_xywh[2];
-        game.InstanceData[instance_offset + 15] = sprite_xywh[3];
+        game.InstanceData[instance_offset + 12] = spritesheet[sprite_name].x;
+        game.InstanceData[instance_offset + 13] = spritesheet[sprite_name].y;
+        game.InstanceData[instance_offset + 14] = spritesheet[sprite_name].w;
+        game.InstanceData[instance_offset + 15] = spritesheet[sprite_name].h;
 
         game.World.Signature[entity] |= Has.Render2D;
         game.World.Render2D[entity] = {
