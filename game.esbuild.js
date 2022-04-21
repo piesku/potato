@@ -1,4 +1,10 @@
 (() => {
+  var __defProp = Object.defineProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+
   // ../common/webgl.ts
   var GL_DEPTH_BUFFER_BIT = 256;
   var GL_COLOR_BUFFER_BIT = 16384;
@@ -42,7 +48,11 @@
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    return texture;
+    return {
+      Texture: texture,
+      Width: image.width,
+      Height: image.height
+    };
   }
 
   // ../common/game.ts
@@ -231,9 +241,9 @@
     }
     FrameReset(delta) {
       this.ViewportResized = false;
-      let update6 = performance.now() - this.Now;
+      let update7 = performance.now() - this.Now;
       if (update_span) {
-        update_span.textContent = update6.toFixed(1);
+        update_span.textContent = update7.toFixed(1);
       }
       if (delta_span) {
         delta_span.textContent = (delta * 1e3).toFixed(1);
@@ -291,6 +301,7 @@
   var vertex = `#version 300 es
 
     uniform mat4 pv;
+    uniform vec2 sheet_size;
 
     // Vertex attributes
     in vec4 attr_position;
@@ -320,7 +331,10 @@
             gl_Position.z = 2.0;
         }
 
-        vert_texcoord = (attr_sprite.xy + attr_texcoord) / attr_sprite.zw;
+
+        // attr_texcoords are +Y=down for compatibility with spritesheet frame coordinates.
+        vert_texcoord = (attr_sprite.xy + attr_sprite.zw * attr_texcoord) / sheet_size;
+        vert_texcoord.y *= -1.0;
         vert_color = attr_color;
     }
 `;
@@ -328,7 +342,7 @@
 
     precision mediump float;
 
-    uniform sampler2D sheet;
+    uniform sampler2D sheet_texture;
 
     in vec2 vert_texcoord;
     in vec4 vert_color;
@@ -336,7 +350,7 @@
     out vec4 frag_color;
 
     void main() {
-        frag_color = vert_color * texture(sheet, vert_texcoord);
+        frag_color = vert_color * texture(sheet_texture, vert_texcoord);
         if (frag_color.a == 0.0) {
             discard;
         }
@@ -350,7 +364,8 @@
       Locations: {
         Pv: gl.getUniformLocation(program, "pv"),
         World: gl.getUniformLocation(program, "world"),
-        SpriteSheet: gl.getUniformLocation(program, "sheet"),
+        SheetTexture: gl.getUniformLocation(program, "sheet_texture"),
+        SheetSize: gl.getUniformLocation(program, "sheet_size"),
         VertexPosition: gl.getAttribLocation(program, "attr_position"),
         VertexTexcoord: gl.getAttribLocation(program, "attr_texcoord"),
         InstanceRotation: gl.getAttribLocation(program, "attr_rotation"),
@@ -506,6 +521,7 @@
     constructor() {
       super(...arguments);
       this.Camera = [];
+      this.Collide2D = [];
       this.ControlAlways2D = [];
       this.ControlPlayer = [];
       this.Children = [];
@@ -535,7 +551,7 @@
   }
 
   // ../src/systems/sys_camera2d.ts
-  var QUERY = 512 /* Transform2D */ | 1 /* Camera */;
+  var QUERY = 1024 /* Transform2D */ | 1 /* Camera */;
   var CAMERA_Z = 2;
   function sys_camera2d(game2, delta) {
     game2.Cameras = [];
@@ -561,137 +577,6 @@
         game2.Cameras.push(i);
       }
     }
-  }
-
-  // ../src/systems/sys_control_always2d.ts
-  var QUERY2 = 2 /* ControlAlways2D */ | 64 /* Move2D */;
-  function sys_control_always2d(game2, delta) {
-    for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY2) === QUERY2) {
-        update(game2, i);
-      }
-    }
-  }
-  function update(game2, entity) {
-    let control = game2.World.ControlAlways2D[entity];
-    let move = game2.World.Move2D[entity];
-    if (control.Direction) {
-      move.Direction[0] = control.Direction[0];
-      move.Direction[1] = control.Direction[1];
-      game2.World.Signature[entity] |= 16 /* Dirty */;
-    }
-    if (control.Rotation) {
-      move.Rotation = control.Rotation;
-      game2.World.Signature[entity] |= 16 /* Dirty */;
-    }
-  }
-
-  // ../common/number.ts
-  function clamp(min, max, num) {
-    return Math.max(min, Math.min(max, num));
-  }
-
-  // ../src/systems/sys_control_camera.ts
-  var QUERY3 = 1 /* Camera */ | 4 /* ControlPlayer */;
-  var wheel_y_clamped = 0;
-  function sys_control_camera(game2, delta) {
-    if (game2.InputDelta["WheelY"]) {
-      wheel_y_clamped = clamp(-500, 500, wheel_y_clamped + game2.InputDelta["WheelY"]);
-      let zoom = 4 ** (wheel_y_clamped / -500);
-      if (0.9 < zoom && zoom < 1.1) {
-        zoom = 1;
-      }
-      game2.UnitSize = BASE_UNIT_SIZE * zoom;
-      game2.ViewportResized = true;
-    }
-    if (game2.DraggedEntity !== null) {
-      return;
-    }
-    if (game2.InputDelta["Mouse0"] === 1) {
-      document.body.classList.add("grabbing");
-    } else if (game2.InputDelta["Mouse0"] === -1) {
-      document.body.classList.remove("grabbing");
-    }
-    if (game2.InputDistance["Mouse0"] > 5) {
-      for (let i = 0; i < game2.World.Signature.length; i++) {
-        if ((game2.World.Signature[i] & QUERY3) === QUERY3) {
-          update2(game2, i);
-        }
-      }
-    }
-  }
-  function update2(game2, entity) {
-    let entity_transform = game2.World.Transform2D[entity];
-    if (game2.InputDistance["Mouse0"] > 5) {
-      entity_transform.Translation[0] -= game2.InputDelta["MouseX"] / game2.UnitSize;
-      entity_transform.Translation[1] += game2.InputDelta["MouseY"] / game2.UnitSize;
-      game2.World.Signature[entity] |= 16 /* Dirty */;
-    }
-  }
-
-  // ../common/vec2.ts
-  function set(out, x, y) {
-    out[0] = x;
-    out[1] = y;
-    return out;
-  }
-  function copy(out, a) {
-    out[0] = a[0];
-    out[1] = a[1];
-    return out;
-  }
-  function add(out, a, b) {
-    out[0] = a[0] + b[0];
-    out[1] = a[1] + b[1];
-    return out;
-  }
-  function subtract(out, a, b) {
-    out[0] = a[0] - b[0];
-    out[1] = a[1] - b[1];
-    return out;
-  }
-  function scale(out, a, b) {
-    out[0] = a[0] * b;
-    out[1] = a[1] * b;
-    return out;
-  }
-  function normalize2(out, a) {
-    let x = a[0];
-    let y = a[1];
-    let len = x * x + y * y;
-    if (len > 0) {
-      len = 1 / Math.sqrt(len);
-    }
-    out[0] = a[0] * len;
-    out[1] = a[1] * len;
-    return out;
-  }
-  function transform_direction(out, a, m) {
-    let x = a[0];
-    let y = a[1];
-    out[0] = m[0] * x + m[2] * y;
-    out[1] = m[1] * x + m[3] * y;
-    return out;
-  }
-  function length(a) {
-    return Math.hypot(a[0], a[1]);
-  }
-
-  // ../src/systems/sys_control_drag.ts
-  function sys_control_drag(game2, delta) {
-    if (game2.DraggedEntity === null) {
-      return;
-    }
-    let entity = game2.DraggedEntity;
-    if (game2.InputDelta["Mouse0"] === -1) {
-      document.body.classList.remove("grabbing");
-      game2.DraggedEntity = null;
-      return;
-    }
-    let entity_transform = game2.World.Transform2D[entity];
-    copy(entity_transform.Translation, game2.PointerPosition);
-    subtract(entity_transform.Translation, entity_transform.Translation, game2.PointerOffset);
-    game2.World.Signature[entity] |= 16 /* Dirty */;
   }
 
   // ../common/mat2d.ts
@@ -749,8 +634,173 @@
     return out;
   }
 
+  // ../common/vec2.ts
+  function set(out, x, y) {
+    out[0] = x;
+    out[1] = y;
+    return out;
+  }
+  function copy(out, a) {
+    out[0] = a[0];
+    out[1] = a[1];
+    return out;
+  }
+  function add(out, a, b) {
+    out[0] = a[0] + b[0];
+    out[1] = a[1] + b[1];
+    return out;
+  }
+  function subtract(out, a, b) {
+    out[0] = a[0] - b[0];
+    out[1] = a[1] - b[1];
+    return out;
+  }
+  function scale(out, a, b) {
+    out[0] = a[0] * b;
+    out[1] = a[1] * b;
+    return out;
+  }
+  function normalize2(out, a) {
+    let x = a[0];
+    let y = a[1];
+    let len = x * x + y * y;
+    if (len > 0) {
+      len = 1 / Math.sqrt(len);
+    }
+    out[0] = a[0] * len;
+    out[1] = a[1] * len;
+    return out;
+  }
+  function dot(a, b) {
+    return a[0] * b[0] + a[1] * b[1];
+  }
+  function transform_direction(out, a, m) {
+    let x = a[0];
+    let y = a[1];
+    out[0] = m[0] * x + m[2] * y;
+    out[1] = m[1] * x + m[3] * y;
+    return out;
+  }
+  function length(a) {
+    return Math.hypot(a[0], a[1]);
+  }
+  function distance(a, b) {
+    let x = b[0] - a[0];
+    let y = b[1] - a[1];
+    return Math.hypot(x, y);
+  }
+  function distance_squared(a, b) {
+    let x = b[0] - a[0];
+    let y = b[1] - a[1];
+    return x * x + y * y;
+  }
+
+  // ../src/systems/sys_collide2d.ts
+  var QUERY2 = 1024 /* Transform2D */ | 2 /* Collide2D */;
+  function sys_collide2d(game2, delta) {
+    for (let ent = 0; ent < game2.World.Signature.length; ent++) {
+      if ((game2.World.Signature[ent] & QUERY2) === QUERY2) {
+        let transform = game2.World.Transform2D[ent];
+        let collider = game2.World.Collide2D[ent];
+        get_translation(collider.Center, transform.World);
+        if (collider.Dynamic) {
+          collider.ContactId = null;
+        }
+      }
+    }
+    for (let ent = 0; ent < game2.World.Signature.length; ent++) {
+      if ((game2.World.Signature[ent] & QUERY2) === QUERY2) {
+        let collider = game2.World.Collide2D[ent];
+        if (!collider.Dynamic) {
+          for (let oth = 0; oth < game2.World.Signature.length; oth++) {
+            if ((game2.World.Signature[oth] & QUERY2) === QUERY2) {
+              let other_collider = game2.World.Collide2D[oth];
+              if (other_collider.Dynamic && intersect(collider, other_collider)) {
+                other_collider.ContactId = ent;
+                subtract(other_collider.ContactNormal, other_collider.Center, collider.Center);
+                normalize2(other_collider.ContactNormal, other_collider.ContactNormal);
+                other_collider.ContactDepth = collider.Radius + other_collider.Radius - distance(collider.Center, other_collider.Center);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  function intersect(a, b) {
+    return distance_squared(a.Center, b.Center) < (a.Radius + b.Radius) ** 2;
+  }
+
+  // ../src/systems/sys_control_always2d.ts
+  var QUERY3 = 4 /* ControlAlways2D */ | 128 /* Move2D */;
+  function sys_control_always2d(game2, delta) {
+    for (let i = 0; i < game2.World.Signature.length; i++) {
+      if ((game2.World.Signature[i] & QUERY3) === QUERY3) {
+        update(game2, i);
+      }
+    }
+  }
+  function update(game2, entity) {
+    let control = game2.World.ControlAlways2D[entity];
+    let move = game2.World.Move2D[entity];
+    if (control.Direction) {
+      move.Direction[0] = control.Direction[0];
+      move.Direction[1] = control.Direction[1];
+      game2.World.Signature[entity] |= 32 /* Dirty */;
+    }
+    if (control.Rotation) {
+      move.Rotation = control.Rotation;
+      game2.World.Signature[entity] |= 32 /* Dirty */;
+    }
+  }
+
+  // ../common/number.ts
+  function clamp(min, max, num) {
+    return Math.max(min, Math.min(max, num));
+  }
+
+  // ../src/systems/sys_control_camera.ts
+  var QUERY4 = 1 /* Camera */ | 8 /* ControlPlayer */;
+  var wheel_y_clamped = 0;
+  function sys_control_camera(game2, delta) {
+    if (game2.InputDelta["WheelY"]) {
+      wheel_y_clamped = clamp(-500, 500, wheel_y_clamped + game2.InputDelta["WheelY"]);
+      let zoom = 4 ** (wheel_y_clamped / -500);
+      if (0.9 < zoom && zoom < 1.1) {
+        zoom = 1;
+      }
+      game2.UnitSize = BASE_UNIT_SIZE * zoom;
+      game2.ViewportResized = true;
+    }
+    if (game2.DraggedEntity !== null) {
+      return;
+    }
+    if (game2.InputDelta["Mouse0"] === 1) {
+      document.body.classList.add("grabbing");
+    } else if (game2.InputDelta["Mouse0"] === -1) {
+      document.body.classList.remove("grabbing");
+    }
+    if (game2.InputDistance["Mouse0"] > 5) {
+      for (let i = 0; i < game2.World.Signature.length; i++) {
+        if ((game2.World.Signature[i] & QUERY4) === QUERY4) {
+          update2(game2, i);
+        }
+      }
+    }
+  }
+  function update2(game2, entity) {
+    let entity_transform = game2.World.Transform2D[entity];
+    if (game2.InputDistance["Mouse0"] > 5) {
+      entity_transform.Translation[0] -= game2.InputDelta["MouseX"] / game2.UnitSize;
+      entity_transform.Translation[1] += game2.InputDelta["MouseY"] / game2.UnitSize;
+      game2.World.Signature[entity] |= 32 /* Dirty */;
+    }
+  }
+
   // ../src/systems/sys_control_grab.ts
-  var QUERY4 = 32 /* Grabbable */ | 512 /* Transform2D */;
+  var QUERY5 = 64 /* Grabbable */ | 1024 /* Transform2D */;
+  var pointer_position = [0, 0];
+  var pointer_offset = [0, 0];
   function sys_control_grab(game2, delta) {
     let camera_entity = game2.Cameras[0];
     if (camera_entity === void 0) {
@@ -766,28 +816,35 @@
     transform_position(pointer3d, pointer3d, camera.Projection.Inverse);
     let camera_transform = game2.World.Transform2D[camera_entity];
     let pointer2d = [pointer3d[0], pointer3d[1]];
-    transform_point(game2.PointerPosition, pointer2d, camera_transform.World);
-    let hovered = null;
+    transform_point(pointer_position, pointer2d, camera_transform.World);
+    if (game2.DraggedEntity !== null) {
+      if (game2.InputDelta["Mouse0"] === -1) {
+        document.body.classList.remove("grabbing");
+        game2.DraggedEntity = null;
+        return;
+      }
+      let entity_transform = game2.World.Transform2D[game2.DraggedEntity];
+      copy(entity_transform.Translation, pointer_position);
+      subtract(entity_transform.Translation, entity_transform.Translation, pointer_offset);
+      game2.World.Signature[game2.DraggedEntity] |= 32 /* Dirty */;
+      return;
+    }
     for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-      if ((game2.World.Signature[ent] & QUERY4) === QUERY4) {
+      if ((game2.World.Signature[ent] & QUERY5) === QUERY5) {
         let entity_transform = game2.World.Transform2D[ent];
-        if (is_pointer_over(game2.PointerPosition, entity_transform)) {
-          hovered = ent;
-          break;
+        if (is_pointer_over(pointer_position, entity_transform)) {
+          document.body.classList.add("grab");
+          if (game2.InputDelta["Mouse0"] === 1) {
+            document.body.classList.add("grabbing");
+            game2.DraggedEntity = ent;
+            let dragged_transform = game2.World.Transform2D[ent];
+            subtract(pointer_offset, pointer_position, dragged_transform.Translation);
+          }
+          return;
         }
       }
     }
-    if (hovered !== null) {
-      document.body.classList.add("grab");
-      if (game2.InputDelta["Mouse0"] === 1) {
-        document.body.classList.add("grabbing");
-        game2.DraggedEntity = hovered;
-        let dragged_transform = game2.World.Transform2D[hovered];
-        subtract(game2.PointerOffset, game2.PointerPosition, dragged_transform.Translation);
-      }
-    } else {
-      document.body.classList.remove("grab");
-    }
+    document.body.classList.remove("grab");
   }
   var world_position = [0, 0];
   var bounds_world = [0, 0, 0, 0];
@@ -801,10 +858,10 @@
   }
 
   // ../src/systems/sys_move2d.ts
-  var QUERY5 = 512 /* Transform2D */ | 64 /* Move2D */ | 16 /* Dirty */;
+  var QUERY6 = 1024 /* Transform2D */ | 128 /* Move2D */ | 32 /* Dirty */;
   function sys_move2d(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY5) === QUERY5) {
+      if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
         update3(game2, i, delta);
       }
     }
@@ -848,21 +905,22 @@
   // ../src/components/com_rigid_body2d.ts
   function rigid_body2d(kind, friction) {
     return (game2, entity) => {
-      game2.World.Signature[entity] |= 256 /* RigidBody2D */;
+      game2.World.Signature[entity] |= 512 /* RigidBody2D */;
       game2.World.RigidBody2D[entity] = {
         Kind: kind,
         Friction: friction,
         Acceleration: [0, 0],
-        VelocityIntegrated: [0, 0]
+        VelocityIntegrated: [0, 0],
+        VelocityResolved: [0, 0]
       };
     };
   }
 
   // ../src/systems/sys_physics2d_bounds.ts
-  var QUERY6 = 512 /* Transform2D */ | 256 /* RigidBody2D */;
+  var QUERY7 = 1024 /* Transform2D */ | 512 /* RigidBody2D */;
   function sys_physics2d_bounds(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
+      if ((game2.World.Signature[i] & QUERY7) === QUERY7) {
         update4(game2, i, delta);
       }
     }
@@ -875,26 +933,26 @@
       let left = -game2.ViewportWidth / game2.UnitSize / 2;
       if (transform.Translation[1] < bottom) {
         transform.Translation[1] = bottom;
-        rigid_body.VelocityIntegrated[0] = float(-3, 3);
-        rigid_body.VelocityIntegrated[1] *= float(-1.1, -1);
+        rigid_body.VelocityResolved[0] = float(-3, 3);
+        rigid_body.VelocityResolved[1] *= float(-1.1, -1);
       }
       if (transform.Translation[0] < left) {
         transform.Translation[0] = left;
-        rigid_body.VelocityIntegrated[0] *= -1;
+        rigid_body.VelocityResolved[0] *= -1;
       }
       if (transform.Translation[0] > -left) {
         transform.Translation[0] = -left;
-        rigid_body.VelocityIntegrated[0] *= -1;
+        rigid_body.VelocityResolved[0] *= -1;
       }
     }
   }
 
   // ../src/systems/sys_physics2d_integrate.ts
-  var QUERY7 = 512 /* Transform2D */ | 256 /* RigidBody2D */;
+  var QUERY8 = 1024 /* Transform2D */ | 512 /* RigidBody2D */;
   var GRAVITY = -9.81;
   function sys_physics2d_integrate(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY7) === QUERY7) {
+      if ((game2.World.Signature[i] & QUERY8) === QUERY8) {
         update5(game2, i, delta);
       }
     }
@@ -903,6 +961,7 @@
     let transform = game2.World.Transform2D[entity];
     let rigid_body = game2.World.RigidBody2D[entity];
     if (rigid_body.Kind === 1 /* Dynamic */) {
+      copy(rigid_body.VelocityIntegrated, rigid_body.VelocityResolved);
       rigid_body.VelocityIntegrated[1] += GRAVITY * delta;
       scale(rigid_body.Acceleration, rigid_body.Acceleration, delta);
       add(rigid_body.VelocityIntegrated, rigid_body.VelocityIntegrated, rigid_body.Acceleration);
@@ -910,8 +969,38 @@
       let vel_delta = [0, 0];
       scale(vel_delta, rigid_body.VelocityIntegrated, delta);
       add(transform.Translation, transform.Translation, vel_delta);
-      game2.World.Signature[entity] |= 16 /* Dirty */;
+      game2.World.Signature[entity] |= 32 /* Dirty */;
       set(rigid_body.Acceleration, 0, 0);
+    }
+  }
+
+  // ../src/systems/sys_physics2d_resolve.ts
+  var QUERY9 = 1024 /* Transform2D */ | 2 /* Collide2D */ | 512 /* RigidBody2D */;
+  function sys_physics2d_resolve(game2, delta) {
+    for (let ent = 0; ent < game2.World.Signature.length; ent++) {
+      if ((game2.World.Signature[ent] & QUERY9) === QUERY9) {
+        update6(game2, ent);
+      }
+    }
+  }
+  var response_translation = [0, 0];
+  var response_velocity = [0, 0];
+  function update6(game2, entity) {
+    let transform = game2.World.Transform2D[entity];
+    let rigid_body = game2.World.RigidBody2D[entity];
+    let collide = game2.World.Collide2D[entity];
+    if (rigid_body.Kind === 1 /* Dynamic */ && collide.Dynamic) {
+      if (collide.ContactId !== null && game2.World.Signature[collide.ContactId] & 512 /* RigidBody2D */) {
+        scale(response_translation, collide.ContactNormal, collide.ContactDepth);
+        add(transform.Translation, transform.Translation, response_translation);
+        game2.World.Signature[entity] |= 32 /* Dirty */;
+        let other_rigid_body = game2.World.RigidBody2D[collide.ContactId];
+        let response_magnitude = dot(rigid_body.VelocityIntegrated, collide.ContactNormal);
+        scale(response_velocity, collide.ContactNormal, -response_magnitude * other_rigid_body.Friction);
+        add(rigid_body.VelocityResolved, rigid_body.VelocityIntegrated, response_velocity);
+      } else {
+        copy(rigid_body.VelocityResolved, rigid_body.VelocityIntegrated);
+      }
     }
   }
 
@@ -919,7 +1008,7 @@
   function sys_render2d(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       let offset = i * FLOATS_PER_INSTANCE + 7;
-      if (game2.World.Signature[i] & 128 /* Render2D */) {
+      if (game2.World.Signature[i] & 256 /* Render2D */) {
         if (game2.InstanceData[offset] == 0) {
           game2.InstanceData[offset] = 1;
         }
@@ -942,11 +1031,13 @@
   }
   function render_all(game2, eye) {
     let material = game2.MaterialInstanced;
+    let sheet = game2.Textures["spritesheet.png"];
     game2.Gl.useProgram(material.Program);
     game2.Gl.uniformMatrix4fv(material.Locations.Pv, false, eye.Pv);
     game2.Gl.activeTexture(GL_TEXTURE0);
-    game2.Gl.bindTexture(GL_TEXTURE_2D, game2.Textures["spritesheet.png"]);
-    game2.Gl.uniform1i(material.Locations.SpriteSheet, 0);
+    game2.Gl.bindTexture(GL_TEXTURE_2D, sheet.Texture);
+    game2.Gl.uniform1i(material.Locations.SheetTexture, 0);
+    game2.Gl.uniform2f(material.Locations.SheetSize, sheet.Width, sheet.Height);
     game2.Gl.bindBuffer(GL_ARRAY_BUFFER, game2.InstanceBuffer);
     game2.Gl.bufferData(GL_ARRAY_BUFFER, game2.InstanceData, GL_STREAM_DRAW);
     game2.Gl.drawArraysInstanced(material.Mode, 0, 4, game2.World.Signature.length);
@@ -969,7 +1060,7 @@
   }
 
   // ../src/systems/sys_resize2d.ts
-  var QUERY8 = 1 /* Camera */;
+  var QUERY10 = 1 /* Camera */;
   function sys_resize2d(game2, delta) {
     if (game2.ViewportWidth != window.innerWidth || game2.ViewportHeight != window.innerHeight) {
       game2.ViewportResized = true;
@@ -978,7 +1069,7 @@
       game2.ViewportWidth = game2.Canvas3D.width = game2.Canvas2D.width = window.innerWidth;
       game2.ViewportHeight = game2.Canvas3D.height = game2.Canvas2D.height = window.innerHeight;
       for (let i = 0; i < game2.World.Signature.length; i++) {
-        if ((game2.World.Signature[i] & QUERY8) === QUERY8) {
+        if ((game2.World.Signature[i] & QUERY10) === QUERY10) {
           let camera = game2.World.Camera[i];
           if (camera.Kind == 0 /* Canvas */ && camera.Projection.Kind == 1 /* Orthographic */) {
             camera.Projection.Radius = game2.ViewportHeight / game2.UnitSize / 2;
@@ -996,10 +1087,10 @@
   var RAD_TO_DEG = 180 / Math.PI;
 
   // ../src/systems/sys_transform2d.ts
-  var QUERY9 = 512 /* Transform2D */ | 16 /* Dirty */;
+  var QUERY11 = 1024 /* Transform2D */ | 32 /* Dirty */;
   function sys_transform2d(game2, delta) {
     for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-      if ((game2.World.Signature[ent] & QUERY9) === QUERY9) {
+      if ((game2.World.Signature[ent] & QUERY11) === QUERY11) {
         let transform = game2.World.Transform2D[ent];
         update_transform(game2.World, ent, transform);
       }
@@ -1007,7 +1098,7 @@
   }
   var world_position2 = [0, 0];
   function update_transform(world, entity, transform) {
-    world.Signature[entity] &= ~16 /* Dirty */;
+    world.Signature[entity] &= ~32 /* Dirty */;
     compose(transform.World, transform.Translation, transform.Rotation * DEG_TO_RAD, transform.Scale);
     if (transform.Parent !== void 0) {
       let parent_transform = world.Transform2D[transform.Parent];
@@ -1018,11 +1109,11 @@
       }
     }
     invert2(transform.Self, transform.World);
-    if (world.Signature[entity] & 8 /* Children */) {
+    if (world.Signature[entity] & 16 /* Children */) {
       let children = world.Children[entity];
       for (let i = 0; i < children.Children.length; i++) {
         let child = children.Children[i];
-        if (world.Signature[child] & 512 /* Transform2D */) {
+        if (world.Signature[child] & 1024 /* Transform2D */) {
           let child_transform = world.Transform2D[child];
           child_transform.Parent = entity;
           update_transform(world, child, child_transform);
@@ -1043,8 +1134,6 @@
       this.MaterialInstanced = mat_instanced2d(this.Gl);
       this.Textures = {};
       this.UnitSize = BASE_UNIT_SIZE;
-      this.PointerPosition = [0, 0];
-      this.PointerOffset = [0, 0];
       this.DraggedEntity = null;
       this.InstanceData = new Float32Array(this.World.Capacity * FLOATS_PER_INSTANCE);
       this.InstanceBuffer = this.Gl.createBuffer();
@@ -1074,10 +1163,12 @@
     }
     FixedUpdate(delta) {
       sys_control_grab(this, delta);
-      sys_control_drag(this, delta);
       sys_control_camera(this, delta);
       sys_physics2d_bounds(this, delta);
       sys_physics2d_integrate(this, delta);
+      sys_transform2d(this, delta);
+      sys_collide2d(this, delta);
+      sys_physics2d_resolve(this, delta);
       sys_transform2d(this, delta);
     }
     FrameUpdate(delta) {
@@ -1093,22 +1184,22 @@
     -0.5,
     0,
     0,
-    0,
+    1,
     0.5,
     -0.5,
     0,
     1,
-    0,
+    1,
     -0.5,
     0.5,
     0,
     0,
-    1,
+    0,
     0.5,
     0.5,
     0,
     1,
-    1
+    0
   ]);
 
   // ../common/color.ts
@@ -1134,10 +1225,37 @@
     }
   }
 
+  // ../src/components/com_collide2d.ts
+  function collide2d_dynamic(diameter) {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 2 /* Collide2D */;
+      game2.World.Collide2D[entity] = {
+        EntityId: entity,
+        Dynamic: true,
+        Radius: diameter / 2,
+        Center: [0, 0],
+        ContactId: null,
+        ContactNormal: [0, 0],
+        ContactDepth: 0
+      };
+    };
+  }
+  function collide2d_static(diameter) {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 2 /* Collide2D */;
+      game2.World.Collide2D[entity] = {
+        EntityId: entity,
+        Dynamic: false,
+        Radius: diameter / 2,
+        Center: [0, 0]
+      };
+    };
+  }
+
   // ../src/components/com_control_player.ts
   function control_player() {
     return (game2, entity) => {
-      game2.World.Signature[entity] |= 4 /* ControlPlayer */;
+      game2.World.Signature[entity] |= 8 /* ControlPlayer */;
       game2.World.ControlPlayer[entity] = {};
     };
   }
@@ -1145,12 +1263,117 @@
   // ../src/components/com_grabbable.ts
   function grabbable() {
     return (game2, entity) => {
-      game2.World.Signature[entity] |= 32 /* Grabbable */;
+      game2.World.Signature[entity] |= 64 /* Grabbable */;
     };
   }
 
+  // ../textures/spritesheet.json
+  var spritesheet_exports = {};
+  __export(spritesheet_exports, {
+    default: () => spritesheet_default,
+    "garnek11.png": () => garnek11_png,
+    "garnek12.png": () => garnek12_png,
+    "garnek13.png": () => garnek13_png,
+    "garnek14.png": () => garnek14_png,
+    "garnek21.png": () => garnek21_png,
+    "garnek22.png": () => garnek22_png,
+    "garnek23.png": () => garnek23_png,
+    "garnek24.png": () => garnek24_png,
+    "sloik.png": () => sloik_png,
+    "ziemniak_gibs.png": () => ziemniak_gibs_png,
+    "ziemniak_obrany.png": () => ziemniak_obrany_png,
+    "ziemniak_surowy.png": () => ziemniak_surowy_png
+  });
+  var garnek11_png = {
+    x: 0,
+    y: 0,
+    width: 128,
+    height: 96
+  };
+  var garnek12_png = {
+    x: 128,
+    y: 0,
+    width: 128,
+    height: 96
+  };
+  var garnek13_png = {
+    x: 0,
+    y: 96,
+    width: 128,
+    height: 96
+  };
+  var garnek14_png = {
+    x: 128,
+    y: 96,
+    width: 128,
+    height: 96
+  };
+  var garnek21_png = {
+    x: 256,
+    y: 0,
+    width: 128,
+    height: 96
+  };
+  var garnek22_png = {
+    x: 256,
+    y: 96,
+    width: 128,
+    height: 96
+  };
+  var garnek23_png = {
+    x: 0,
+    y: 192,
+    width: 128,
+    height: 96
+  };
+  var garnek24_png = {
+    x: 128,
+    y: 192,
+    width: 128,
+    height: 96
+  };
+  var sloik_png = {
+    x: 256,
+    y: 192,
+    width: 64,
+    height: 64
+  };
+  var ziemniak_gibs_png = {
+    x: 320,
+    y: 192,
+    width: 32,
+    height: 32
+  };
+  var ziemniak_obrany_png = {
+    x: 352,
+    y: 192,
+    width: 32,
+    height: 32
+  };
+  var ziemniak_surowy_png = {
+    x: 320,
+    y: 224,
+    width: 32,
+    height: 32
+  };
+  var spritesheet_default = {
+    "garnek11.png": garnek11_png,
+    "garnek12.png": garnek12_png,
+    "garnek13.png": garnek13_png,
+    "garnek14.png": garnek14_png,
+    "garnek21.png": garnek21_png,
+    "garnek22.png": garnek22_png,
+    "garnek23.png": garnek23_png,
+    "garnek24.png": garnek24_png,
+    "sloik.png": sloik_png,
+    "ziemniak_gibs.png": ziemniak_gibs_png,
+    "ziemniak_obrany.png": ziemniak_obrany_png,
+    "ziemniak_surowy.png": ziemniak_surowy_png
+  };
+
   // ../src/components/com_render2d.ts
-  function render2d(sheet_size, sprite_offset, color = [1, 1, 1, 1]) {
+  var spritesheet = spritesheet_exports;
+  function render2d(sprite_name, color = [1, 1, 1, 1]) {
     return (game2, entity) => {
       let instance_offset = entity * FLOATS_PER_INSTANCE;
       game2.InstanceData[instance_offset + 6] = 0;
@@ -1159,11 +1382,11 @@
       game2.InstanceData[instance_offset + 9] = color[1];
       game2.InstanceData[instance_offset + 10] = color[2];
       game2.InstanceData[instance_offset + 11] = color[3];
-      game2.InstanceData[instance_offset + 12] = sprite_offset[0];
-      game2.InstanceData[instance_offset + 13] = sheet_size[1] - sprite_offset[1] - 1;
-      game2.InstanceData[instance_offset + 14] = sheet_size[0];
-      game2.InstanceData[instance_offset + 15] = sheet_size[1];
-      game2.World.Signature[entity] |= 128 /* Render2D */;
+      game2.InstanceData[instance_offset + 12] = spritesheet[sprite_name + ".png"].x;
+      game2.InstanceData[instance_offset + 13] = spritesheet[sprite_name + ".png"].y;
+      game2.InstanceData[instance_offset + 14] = spritesheet[sprite_name + ".png"].width;
+      game2.InstanceData[instance_offset + 15] = spritesheet[sprite_name + ".png"].height;
+      game2.World.Signature[entity] |= 256 /* Render2D */;
       game2.World.Render2D[entity] = {
         Detail: game2.InstanceData.subarray(instance_offset + 6, instance_offset + 8),
         Color: game2.InstanceData.subarray(instance_offset + 8, instance_offset + 12),
@@ -1181,7 +1404,7 @@
   // ../src/components/com_transform2d.ts
   function transform2d(translation = [0, 0], rotation = 0, scale2 = [1, 1]) {
     return (game2, entity) => {
-      game2.World.Signature[entity] |= 512 /* Transform2D */ | 16 /* Dirty */;
+      game2.World.Signature[entity] |= 1024 /* Transform2D */ | 32 /* Dirty */;
       game2.World.Transform2D[entity] = {
         World: game2.InstanceData.subarray(entity * FLOATS_PER_INSTANCE, entity * FLOATS_PER_INSTANCE + 6),
         Self: create2(),
@@ -1204,28 +1427,43 @@
     ]);
     instantiate(game2, [
       transform2d([-6, 0], 0, [4, 3]),
-      render2d([4, 2.33], [0, 0]),
+      render2d("garnek11"),
       order(1),
+      collide2d_static(2),
+      rigid_body2d(0 /* Static */, 1.5),
       grabbable()
     ]);
     instantiate(game2, [
-      transform2d([6, 0], 0, [4, 3]),
-      render2d([4, 2.33], [0, 1]),
+      transform2d([0, -3], 0, [4, 3]),
+      render2d("garnek21"),
       order(1),
+      collide2d_static(2),
+      rigid_body2d(0 /* Static */, 1.5),
       grabbable()
     ]);
+    for (let i = 0; i < 5; i += 1) {
+      instantiate(game2, [
+        transform2d([i + 4, i], 0, [2, 2]),
+        render2d("sloik"),
+        collide2d_static(1.3),
+        rigid_body2d(0 /* Static */, 1.5),
+        grabbable()
+      ]);
+    }
     let dynamic_count = 5e3;
     for (let i = 0; i < dynamic_count; i++) {
       instantiate(game2, [
         transform2d([float(-8, -4), float(10, 100)], 0),
-        render2d([16, 7], [0, 6], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
+        render2d("ziemniak_surowy", hsva_to_vec4(float(0.1, 0.2), 0.2, 1, 1)),
         order(1 - i / dynamic_count),
+        collide2d_dynamic(1),
         rigid_body2d(1 /* Dynamic */, float(0.99, 0.999))
       ]);
       instantiate(game2, [
         transform2d([float(4, 8), float(10, 100)], 0),
-        render2d([16, 7], [1, 6], hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
+        render2d("ziemniak_obrany", hsva_to_vec4(float(0.1, 0.2), 0.5, 1, 1)),
         order(1 - i / dynamic_count),
+        collide2d_dynamic(1),
         rigid_body2d(1 /* Dynamic */, float(0.99, 0.999))
       ]);
     }
@@ -1234,7 +1472,7 @@
   // ../src/index.ts
   var game = new Game3();
   window.game = game;
-  Promise.all([load_texture(game, "checker1.png"), load_texture(game, "spritesheet.png")]).then(() => {
+  Promise.all([load_texture(game, "spritesheet.png")]).then(() => {
     scene_stage(game);
     game.Start();
   });
