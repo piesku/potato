@@ -7,12 +7,10 @@ let game = new Game();
 // @ts-ignore
 window.game = game;
 
-Promise.all([load_texture(game, "checker1.png"), load_texture(game, "spritesheet.png")]).then(
-    () => {
-        scene_stage(game);
-        game.Start();
-    }
-);
+Promise.all([load_texture(game, "spritesheet.png")]).then(() => {
+    scene_stage(game);
+    game.Start();
+});
 
 async function load_texture(game: Game, name: string) {
     let image = await fetch_image("../textures/" + name + ".webp");
