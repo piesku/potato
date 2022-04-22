@@ -27,7 +27,11 @@ export function sys_collide2d(game: Game, delta: number) {
                 for (let oth = 0; oth < game.World.Signature.length; oth++) {
                     if ((game.World.Signature[oth] & QUERY) === QUERY) {
                         let other_collider = game.World.Collide2D[oth];
-                        if (other_collider.Dynamic && intersect(collider, other_collider)) {
+                        if (
+                            other_collider.Dynamic &&
+                            other_collider.Mask & collider.Layer &&
+                            intersect(collider, other_collider)
+                        ) {
                             other_collider.ContactId = ent;
                             subtract(
                                 other_collider.ContactNormal,

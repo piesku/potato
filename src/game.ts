@@ -158,3 +158,11 @@ let vertex_arr = Float32Array.from([
     -0.5, 0.5, 0,     0, 0,    // NW
     0.5, 0.5, 0,      1, 0     // NE
 ]);
+
+export const enum Layer {
+    None,
+    Obstacle = 1 << 0,
+    PotatoBoil = 1 << 1,
+    PotatoPeel = 1 << 2,
+    PotatoCut = 1 << 3,
+}
