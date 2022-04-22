@@ -42,6 +42,15 @@ export function scene_stage(game: Game) {
         grabbable(),
     ]);
 
+    // Garnek2.
+    instantiate(game, [
+        transform2d([0, -3], 0, [4, 3]),
+        render2d("garnek24"),
+        order(1),
+        collide_static(Layer.PotatoCut, 1),
+        grabbable(),
+    ]);
+
     for (let i = 0; i < 5; i += 1) {
         instantiate(game, [
             transform2d([i + 4, i], 0, [2, 2]),

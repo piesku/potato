@@ -20,6 +20,7 @@ const spritesheet: {
 } = _spritesheet;
 
 export function render2d(sprite_name: string, color: Vec4 = [1, 1, 1, 1]) {
+    let sprite_path = "../assets/" + sprite_name + ".png";
     return (game: Game, entity: Entity) => {
         let instance_offset = entity * FLOATS_PER_INSTANCE;
         // Detail.
@@ -31,10 +32,10 @@ export function render2d(sprite_name: string, color: Vec4 = [1, 1, 1, 1]) {
         game.InstanceData[instance_offset + 10] = color[2];
         game.InstanceData[instance_offset + 11] = color[3];
         // Sprite.
-        game.InstanceData[instance_offset + 12] = spritesheet[sprite_name + ".png"].x;
-        game.InstanceData[instance_offset + 13] = spritesheet[sprite_name + ".png"].y;
-        game.InstanceData[instance_offset + 14] = spritesheet[sprite_name + ".png"].width;
-        game.InstanceData[instance_offset + 15] = spritesheet[sprite_name + ".png"].height;
+        game.InstanceData[instance_offset + 12] = spritesheet[sprite_path].x;
+        game.InstanceData[instance_offset + 13] = spritesheet[sprite_path].y;
+        game.InstanceData[instance_offset + 14] = spritesheet[sprite_path].width;
+        game.InstanceData[instance_offset + 15] = spritesheet[sprite_path].height;
 
         game.World.Signature[entity] |= Has.Render2D;
         game.World.Render2D[entity] = {

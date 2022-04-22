@@ -3,7 +3,7 @@
  */
 
 import {hsva_to_vec4} from "../../common/color.js";
-import {float} from "../../common/random.js";
+import {element, float, integer} from "../../common/random.js";
 import {Entity} from "../../common/world.js";
 import {ProcessKind} from "../components/com_control_process.js";
 import {render2d} from "../components/com_render2d.js";
@@ -20,10 +20,13 @@ export function sys_control_process(game: Game, delta: number) {
     }
 }
 
+const rotations = [0, 90, 180, 270];
+
 function update(game: Game, entity: Entity) {
     let control = game.World.ControlProcess[entity];
     let collide = game.World.CollideDynamic[entity];
     let rigid_body = game.World.RigidBody2D[entity];
+    let transform = game.World.Transform2D[entity];
 
     // Set it up.
     if (collide.Mask === Layer.None) {
@@ -51,16 +54,23 @@ function update(game: Game, entity: Entity) {
         case ProcessKind.Potato: {
             if (other.Layer & Layer.PotatoBoil) {
                 render2d("ziemniak_surowy", hsva_to_vec4(float(0, 0.1), 1, 1, 1))(game, entity);
+                transform.Rotation = element(rotations);
                 collide.Mask = Layer.PotatoPeel;
                 break;
             }
             if (other.Layer & Layer.PotatoPeel) {
                 render2d("ziemniak_obrany")(game, entity);
+                transform.Rotation = element(rotations);
                 collide.Mask = Layer.PotatoCut;
                 break;
             }
             if (other.Layer & Layer.PotatoCut) {
+                render2d("ziemniak_kawalek" + integer(1, 2))(game, entity);
+                transform.Scale[0] = 0.5;
+                transform.Scale[1] = 0.5;
+                transform.Rotation = element(rotations);
                 collide.Mask = Layer.Bowl;
+                collide.Radius = 0.5;
                 break;
             }
 

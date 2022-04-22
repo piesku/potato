@@ -1,73 +1,79 @@
 {
-    "garnek11.png": {
+    "../assets/garnek11.png": {
         "x": 0,
         "y": 0,
         "width": 128,
         "height": 96
     },
-    "garnek12.png": {
+    "../assets/garnek12.png": {
         "x": 128,
         "y": 0,
         "width": 128,
         "height": 96
     },
-    "garnek13.png": {
+    "../assets/garnek13.png": {
         "x": 0,
         "y": 96,
         "width": 128,
         "height": 96
     },
-    "garnek14.png": {
+    "../assets/garnek14.png": {
         "x": 128,
         "y": 96,
         "width": 128,
         "height": 96
     },
-    "garnek21.png": {
+    "../assets/garnek21.png": {
         "x": 256,
         "y": 0,
         "width": 128,
         "height": 96
     },
-    "garnek22.png": {
+    "../assets/garnek22.png": {
         "x": 256,
         "y": 96,
         "width": 128,
         "height": 96
     },
-    "garnek23.png": {
+    "../assets/garnek23.png": {
         "x": 0,
         "y": 192,
         "width": 128,
         "height": 96
     },
-    "garnek24.png": {
+    "../assets/garnek24.png": {
         "x": 128,
         "y": 192,
         "width": 128,
         "height": 96
     },
-    "sloik.png": {
+    "../assets/sloik.png": {
         "x": 256,
         "y": 192,
         "width": 64,
         "height": 64
     },
-    "ziemniak_gibs.png": {
-        "x": 320,
-        "y": 192,
-        "width": 32,
-        "height": 32
-    },
-    "ziemniak_obrany.png": {
-        "x": 352,
-        "y": 192,
-        "width": 32,
-        "height": 32
-    },
-    "ziemniak_surowy.png": {
+    "../assets/ziemniak_kawalek1.png": {
         "x": 320,
         "y": 224,
+        "width": 16,
+        "height": 16
+    },
+    "../assets/ziemniak_kawalek2.png": {
+        "x": 336,
+        "y": 224,
+        "width": 16,
+        "height": 16
+    },
+    "../assets/ziemniak_obrany.png": {
+        "x": 320,
+        "y": 192,
+        "width": 32,
+        "height": 32
+    },
+    "../assets/ziemniak_surowy.png": {
+        "x": 352,
+        "y": 192,
         "width": 32,
         "height": 32
     }
