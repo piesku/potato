@@ -5,6 +5,7 @@ import {float} from "../../common/random.js";
 import {camera_canvas} from "../components/com_camera.js";
 import {collide_dynamic, collide_static} from "../components/com_collide2d.js";
 import {control_player} from "../components/com_control_player.js";
+import {control_process, ProcessKind} from "../components/com_control_process.js";
 import {grabbable} from "../components/com_grabbable.js";
 import {order, render2d} from "../components/com_render2d.js";
 import {RigidKind, rigid_body2d} from "../components/com_rigid_body2d.js";
@@ -28,8 +29,7 @@ export function scene_stage(game: Game) {
         transform2d([-6, 0], 0, [4, 3]),
         render2d("garnek11"),
         order(1),
-        collide_static(Layer.PotatoPeel, 2),
-        rigid_body2d(RigidKind.Static, 1.5),
+        collide_static(Layer.PotatoPeel, 1),
         grabbable(),
     ]);
 
@@ -38,8 +38,7 @@ export function scene_stage(game: Game) {
         transform2d([0, -3], 0, [4, 3]),
         render2d("garnek21"),
         order(1),
-        collide_static(Layer.PotatoBoil, 2),
-        rigid_body2d(RigidKind.Static, 1.5),
+        collide_static(Layer.PotatoBoil, 1),
         grabbable(),
     ]);
 
@@ -56,11 +55,15 @@ export function scene_stage(game: Game) {
     let dynamic_count = 100;
     for (let i = 0; i < dynamic_count; i++) {
         instantiate(game, [
-            transform2d([float(-8, 8), float(10, 100)], 0),
-            render2d("ziemniak_surowy", hsva_to_vec4(float(0.1, 0.2), 0.2, 1, 1)),
+            transform2d([float(-1, 1), float(10, 100)], 0),
+            render2d(
+                "ziemniak_surowy",
+                hsva_to_vec4(float(0.1, 0.15), float(0, 0.5), float(0.5, 1), 1)
+            ),
             // Place entities from closest to the farthest away to avoid overdraw.
             order(1 - i / dynamic_count),
-            collide_dynamic(1, Layer.Obstacle | Layer.PotatoBoil),
+            control_process(ProcessKind.Potato),
+            collide_dynamic(1, Layer.None),
             rigid_body2d(RigidKind.Dynamic, float(0.99, 0.999)),
         ]);
     }

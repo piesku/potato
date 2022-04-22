@@ -14,6 +14,7 @@ import {sys_collide2d} from "./systems/sys_collide2d.js";
 import {sys_control_always2d} from "./systems/sys_control_always2d.js";
 import {sys_control_camera} from "./systems/sys_control_camera.js";
 import {sys_control_grab} from "./systems/sys_control_grab.js";
+import {sys_control_process} from "./systems/sys_control_process.js";
 import {sys_move2d} from "./systems/sys_move2d.js";
 import {sys_physics2d_bounds} from "./systems/sys_physics2d_bounds.js";
 import {sys_physics2d_integrate} from "./systems/sys_physics2d_integrate.js";
@@ -138,6 +139,8 @@ export class Game extends Game3D {
         sys_collide2d(this, delta);
         sys_physics2d_resolve(this, delta);
         sys_transform2d(this, delta);
+
+        sys_control_process(this, delta);
     }
 
     override FrameUpdate(delta: number) {
@@ -161,8 +164,9 @@ let vertex_arr = Float32Array.from([
 
 export const enum Layer {
     None,
-    Obstacle = 1 << 0,
-    PotatoBoil = 1 << 1,
-    PotatoPeel = 1 << 2,
-    PotatoCut = 1 << 3,
+    Bowl = 1 << 0,
+    Obstacle = 1 << 1,
+    PotatoBoil = 1 << 2,
+    PotatoPeel = 1 << 3,
+    PotatoCut = 1 << 4,
 }

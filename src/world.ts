@@ -4,6 +4,7 @@ import {Children} from "./components/com_children.js";
 import {CollideDynamic, CollideStatic} from "./components/com_collide2d.js";
 import {ControlAlways2D} from "./components/com_control_always2d.js";
 import {ControlPlayer} from "./components/com_control_player.js";
+import {ControlProcess} from "./components/com_control_process.js";
 import {Move2D} from "./components/com_move2d.js";
 import {Render2D} from "./components/com_render2d.js";
 import {RigidBody2D} from "./components/com_rigid_body2d.js";
@@ -15,6 +16,7 @@ const enum Component {
     CollideStatic,
     ControlAlways2D,
     ControlPlayer,
+    ControlProcess,
     Children,
     Dirty,
     Grabbable,
@@ -31,6 +33,7 @@ export const enum Has {
     CollideStatic = 1 << Component.CollideStatic,
     ControlAlways2D = 1 << Component.ControlAlways2D,
     ControlPlayer = 1 << Component.ControlPlayer,
+    ControlProcess = 1 << Component.ControlProcess,
     Children = 1 << Component.Children,
     Dirty = 1 << Component.Dirty,
     Grabbable = 1 << Component.Grabbable,
@@ -46,6 +49,7 @@ export class World extends WorldImpl {
     CollideStatic: Array<CollideStatic> = [];
     ControlAlways2D: Array<ControlAlways2D> = [];
     ControlPlayer: Array<ControlPlayer> = [];
+    ControlProcess: Array<ControlProcess> = [];
     Children: Array<Children> = [];
     Move2D: Array<Move2D> = [];
     Render2D: Array<Render2D> = [];
