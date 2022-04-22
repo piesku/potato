@@ -3,28 +3,27 @@ import {Entity} from "../../common/world.js";
 import {Game, Layer} from "../game.js";
 import {Has} from "../world.js";
 
-export type Collide2D = Collide2dDynamic | Collide2dStatic;
-
-export interface Collide2dDynamic {
+export interface Collide2D {
     EntityId: Entity;
-    Dynamic: true;
     /** The radius of the collider in world units. */
     Radius: number;
-    Mask: number;
     /** The world position of the center. */
     Center: Vec2;
+}
+
+export interface CollideDynamic extends Collide2D {
+    Mask: number;
     ContactId: Entity | null;
     /* Penetration normal into this collider. */
     ContactNormal: Vec2;
     ContactDepth: number;
 }
 
-export function collide2d_dynamic(diameter: number, mask: number) {
+export function collide_dynamic(diameter: number, mask: number) {
     return (game: Game, entity: Entity) => {
-        game.World.Signature[entity] |= Has.Collide2D;
-        game.World.Collide2D[entity] = {
+        game.World.Signature[entity] |= Has.CollideDynamic;
+        game.World.CollideDynamic[entity] = {
             EntityId: entity,
-            Dynamic: true,
             Mask: mask,
             Radius: diameter / 2,
             Center: [0, 0],
@@ -35,22 +34,15 @@ export function collide2d_dynamic(diameter: number, mask: number) {
     };
 }
 
-export interface Collide2dStatic {
-    EntityId: Entity;
-    Dynamic: false;
+export interface CollideStatic extends Collide2D {
     Layer: Layer;
-    /** The radius of the collider in world units. */
-    Radius: number;
-    /** The world position of the center. */
-    Center: Vec2;
 }
 
-export function collide2d_static(layer: Layer, diameter: number) {
+export function collide_static(layer: Layer, diameter: number) {
     return (game: Game, entity: Entity) => {
-        game.World.Signature[entity] |= Has.Collide2D;
-        game.World.Collide2D[entity] = {
+        game.World.Signature[entity] |= Has.CollideStatic;
+        game.World.CollideStatic[entity] = {
             EntityId: entity,
-            Dynamic: false,
             Layer: layer,
             Radius: diameter / 2,
             Center: [0, 0],
