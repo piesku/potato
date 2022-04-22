@@ -47,33 +47,39 @@
         "width": 128,
         "height": 96
     },
-    "../assets/sloik.png": {
+    "../assets/garnek2_front.png": {
         "x": 256,
         "y": 192,
+        "width": 128,
+        "height": 96
+    },
+    "../assets/sloik.png": {
+        "x": 0,
+        "y": 288,
         "width": 64,
         "height": 64
     },
     "../assets/ziemniak_kawalek1.png": {
-        "x": 320,
-        "y": 224,
+        "x": 128,
+        "y": 288,
         "width": 16,
         "height": 16
     },
     "../assets/ziemniak_kawalek2.png": {
-        "x": 336,
-        "y": 224,
+        "x": 144,
+        "y": 288,
         "width": 16,
         "height": 16
     },
     "../assets/ziemniak_obrany.png": {
-        "x": 320,
-        "y": 192,
+        "x": 64,
+        "y": 288,
         "width": 32,
         "height": 32
     },
     "../assets/ziemniak_surowy.png": {
-        "x": 352,
-        "y": 192,
+        "x": 96,
+        "y": 288,
         "width": 32,
         "height": 32
     }
