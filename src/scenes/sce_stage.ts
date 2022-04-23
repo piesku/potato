@@ -31,7 +31,19 @@ export function scene_stage(game: Game) {
         order(1),
         collide_static(Layer.PotatoBoil, 1),
         grabbable(),
-        children([transform2d(), render2d("garnek21"), order(0)]),
+        children(
+            [transform2d(), render2d("garnek21"), order(0)],
+            [
+                transform2d([-0.3, 0]),
+                collide_static(Layer.Obstacle, 0.3, 0.25),
+                rigid_body2d(RigidKind.Static, 1),
+            ],
+            [
+                transform2d([0.3, 0]),
+                collide_static(Layer.Obstacle, 0.3, 0.25),
+                rigid_body2d(RigidKind.Static, 1),
+            ]
+        ),
     ]);
 
     instantiate(game, [
@@ -40,7 +52,19 @@ export function scene_stage(game: Game) {
         order(1),
         collide_static(Layer.PotatoPeel, 1),
         grabbable(),
-        children([transform2d(), render2d("garnek21"), order(0)]),
+        children(
+            [transform2d(), render2d("garnek21"), order(0)],
+            [
+                transform2d([-0.3, 0]),
+                collide_static(Layer.Obstacle, 0.3, 0.25),
+                rigid_body2d(RigidKind.Static, 1),
+            ],
+            [
+                transform2d([0.3, 0]),
+                collide_static(Layer.Obstacle, 0.3, 0.25),
+                rigid_body2d(RigidKind.Static, 1),
+            ]
+        ),
     ]);
 
     instantiate(game, [
@@ -49,7 +73,19 @@ export function scene_stage(game: Game) {
         order(1),
         collide_static(Layer.PotatoCut, 1),
         grabbable(),
-        children([transform2d(), render2d("garnek21"), order(0)]),
+        children(
+            [transform2d(), render2d("garnek21"), order(0)],
+            [
+                transform2d([-0.3, 0]),
+                collide_static(Layer.Obstacle, 0.3, 0.25),
+                rigid_body2d(RigidKind.Static, 1),
+            ],
+            [
+                transform2d([0.3, 0]),
+                collide_static(Layer.Obstacle, 0.3, 0.25),
+                rigid_body2d(RigidKind.Static, 1),
+            ]
+        ),
     ]);
 
     instantiate(game, [
