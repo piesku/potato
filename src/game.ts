@@ -15,6 +15,7 @@ import {sys_control_always2d} from "./systems/sys_control_always2d.js";
 import {sys_control_camera} from "./systems/sys_control_camera.js";
 import {sys_control_grab} from "./systems/sys_control_grab.js";
 import {sys_control_process} from "./systems/sys_control_process.js";
+import {sys_draw_background} from "./systems/sys_draw_background.js";
 import {sys_move2d} from "./systems/sys_move2d.js";
 import {sys_physics2d_bounds} from "./systems/sys_physics2d_bounds.js";
 import {sys_physics2d_integrate} from "./systems/sys_physics2d_integrate.js";
@@ -151,6 +152,8 @@ export class Game extends Game3D {
 
         sys_resize2d(this, delta);
         sys_camera2d(this, delta);
+
+        sys_draw_background(this, delta);
         sys_render2d(this, delta);
     }
 }

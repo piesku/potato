@@ -21,7 +21,7 @@ export function scene_stage(game: Game) {
     // Camera.
     instantiate(game, [
         transform2d([0, 0]),
-        camera_canvas(orthographic(5, 1, 3)),
+        camera_canvas(orthographic(5, 1, 3), [0, 0, 0, 0]),
         control_player(),
     ]);
 
