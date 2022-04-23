@@ -36,16 +36,25 @@ export function collide_dynamic(diameter: number, mask: number) {
 
 export interface CollideStatic extends Collide2D {
     Layer: Layer;
+    /** The distance between the capsule's base and tip, in self units. */
+    Length: number;
+    /** The world position of the capsule's base. */
+    Base: Vec2;
+    /** The world position of the capsule's tip. */
+    Tip: Vec2;
 }
 
-export function collide_static(layer: Layer, diameter: number) {
+export function collide_static(layer: Layer, diameter: number, length = 0) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.CollideStatic;
         game.World.CollideStatic[entity] = {
             EntityId: entity,
             Layer: layer,
             Radius: diameter / 2,
+            Length: length,
             Center: [0, 0],
+            Tip: [0, 0],
+            Base: [0, 0],
         };
     };
 }
