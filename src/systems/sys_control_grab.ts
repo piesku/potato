@@ -1,6 +1,6 @@
 import {get_translation, transform_point} from "../../common/mat2d.js";
-import {Vec2, Vec3, Vec4} from "../../common/math.js";
-import {copy, subtract} from "../../common/vec2.js";
+import {Vec2, Vec3} from "../../common/math.js";
+import {copy, distance_squared, subtract} from "../../common/vec2.js";
 import {transform_position} from "../../common/vec3.js";
 import {CameraKind} from "../components/com_camera.js";
 import {Transform2D} from "../components/com_transform2d.js";
@@ -69,21 +69,10 @@ export function sys_control_grab(game: Game, delta: number) {
     document.body.classList.remove("grab");
 }
 
-const world_position: Vec2 = [0, 0];
-const bounds_world: Vec4 = [0, 0, 0, 0];
+const entity_world_position: Vec2 = [0, 0];
 
 function is_pointer_over(pointer_world_position: Vec2, entity_transform: Transform2D) {
-    get_translation(world_position, entity_transform.World);
-
-    bounds_world[0] = world_position[0] - entity_transform.Scale[0] / 2;
-    bounds_world[1] = world_position[0] + entity_transform.Scale[0] / 2;
-    bounds_world[2] = world_position[1] - entity_transform.Scale[1] / 2;
-    bounds_world[3] = world_position[1] + entity_transform.Scale[1] / 2;
-
-    return (
-        pointer_world_position[0] > bounds_world[0] &&
-        pointer_world_position[0] < bounds_world[1] &&
-        pointer_world_position[1] > bounds_world[2] &&
-        pointer_world_position[1] < bounds_world[3]
-    );
+    get_translation(entity_world_position, entity_transform.World);
+    // Assume all grabbables are spheres with radius ~= 1.7 world units.
+    return distance_squared(pointer_world_position, entity_world_position) < 2.9;
 }
