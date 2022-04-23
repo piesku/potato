@@ -52,10 +52,26 @@ export function scene_stage(game: Game) {
         children([transform2d(), render2d("garnek21"), order(0)]),
     ]);
 
+    instantiate(game, [
+        transform2d([-2.5, 10], -45, [4, 1]),
+        render2d("platform1"),
+        collide_static(Layer.Obstacle, 1, -0.65),
+        rigid_body2d(RigidKind.Static, 1.3),
+        grabbable(),
+    ]);
+
+    instantiate(game, [
+        transform2d([2.5, 10], 45, [4, 1]),
+        render2d("platform1"),
+        collide_static(Layer.Obstacle, 1, -0.65),
+        rigid_body2d(RigidKind.Static, 1.3),
+        grabbable(),
+    ]);
+
     let dynamic_count = 10000;
     for (let i = 0; i < dynamic_count; i++) {
         instantiate(game, [
-            transform2d([float(-3, 3), float(10, 100)], 0),
+            transform2d([float(-3, 3), float(20, 100)], 0),
             render2d(
                 "ziemniak_surowy",
                 hsva_to_vec4(float(0.1, 0.15), float(0, 0.5), float(0.5, 1), 1)

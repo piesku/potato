@@ -1,6 +1,15 @@
 import {get_translation, transform_point} from "../../common/mat2d.js";
 import {Vec2} from "../../common/math.js";
-import {distance, distance_squared, dot, normalize, subtract} from "../../common/vec2.js";
+import {
+    add,
+    copy,
+    distance,
+    distance_squared,
+    dot,
+    normalize,
+    scale,
+    subtract,
+} from "../../common/vec2.js";
 import {Collide2D, CollideDynamic, CollideStatic} from "../components/com_collide2d.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
@@ -8,6 +17,7 @@ import {Has} from "../world.js";
 const QUERY_DYNAMIC = Has.Transform2D | Has.CollideDynamic;
 const QUERY_STATIC = Has.Transform2D | Has.CollideStatic;
 
+const closest_point: Vec2 = [0, 0];
 export function sys_collide2d(game: Game, delta: number) {
     // Prepare dynamic colliders.
     for (let ent = 0; ent < game.World.Signature.length; ent++) {
@@ -40,21 +50,29 @@ export function sys_collide2d(game: Game, delta: number) {
             for (let oth = 0; oth < game.World.Signature.length; oth++) {
                 if ((game.World.Signature[oth] & QUERY_DYNAMIC) === QUERY_DYNAMIC) {
                     let other_collider = game.World.CollideDynamic[oth];
-                    if (
-                        other_collider.Mask & collider.Layer &&
-                        intersect_capsule_sphere(collider, other_collider)
-                    ) {
-                        other_collider.ContactId = ent;
-                        subtract(
-                            other_collider.ContactNormal,
-                            other_collider.Center,
-                            collider.Center
+                    if (other_collider.Mask & collider.Layer) {
+                        closest_point_on_section(
+                            closest_point,
+                            collider.Base,
+                            collider.Tip,
+                            other_collider.Center
                         );
-                        normalize(other_collider.ContactNormal, other_collider.ContactNormal);
-                        other_collider.ContactDepth =
-                            collider.Radius +
-                            other_collider.Radius -
-                            distance(collider.Center, other_collider.Center);
+                        if (
+                            distance_squared(closest_point, other_collider.Center) <
+                            (collider.Radius + other_collider.Radius) ** 2
+                        ) {
+                            other_collider.ContactId = ent;
+                            subtract(
+                                other_collider.ContactNormal,
+                                other_collider.Center,
+                                closest_point
+                            );
+                            normalize(other_collider.ContactNormal, other_collider.ContactNormal);
+                            other_collider.ContactDepth =
+                                collider.Radius +
+                                other_collider.Radius -
+                                distance(closest_point, other_collider.Center);
+                        }
                     }
                 }
             }
@@ -92,4 +110,31 @@ function distance_squared_to_section(base: Vec2, tip: Vec2, point: Vec2) {
 
     // Handle cases where c projects onto ab
     return dot(ac, ac) - (e * e) / f;
+}
+
+function closest_point_on_section(out: Vec2, base: Vec2, tip: Vec2, point: Vec2) {
+    subtract(ab, tip, base);
+    subtract(ac, point, base);
+    subtract(bc, point, tip);
+
+    // Project c onto ab, but deferring divide by Dot(ab, ab)
+    let t = dot(ac, ab);
+    if (t <= 0) {
+        // c projects outside the [a,b] interval, on the a side; clamp to a
+        t = 0;
+        copy(out, base);
+    } else {
+        let denom = dot(ab, ab); // Always nonnegative since denom = ||ab||∧2
+        if (t >= denom) {
+            // c projects outside the [a,b] interval, on the b side; clamp to b
+            t = 1;
+            copy(out, tip);
+        } else {
+            // c projects inside the [a,b] interval; must do deferred divide now
+            t = t / denom;
+            scale(out, ab, t);
+            add(out, out, base);
+        }
+    }
+    return t;
 }
