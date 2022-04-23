@@ -7,7 +7,7 @@ const QUERY = Has.Camera | Has.ControlPlayer;
 let wheel_y_clamped = 0;
 
 export function sys_control_camera(game: Game, delta: number) {
-    if (game.InputDelta["WheelY"]) {
+    if (game.HoverEntity === null && game.InputDelta["WheelY"]) {
         wheel_y_clamped = clamp(-500, 500, wheel_y_clamped + game.InputDelta["WheelY"]);
         let zoom = 4 ** (wheel_y_clamped / -500);
         if (0.9 < zoom && zoom < 1.1) {
@@ -17,7 +17,7 @@ export function sys_control_camera(game: Game, delta: number) {
         game.ViewportResized = true;
     }
 
-    if (game.DraggedEntity !== null) {
+    if (game.ActiveEntity !== null) {
         return;
     }
 

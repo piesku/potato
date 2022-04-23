@@ -37,7 +37,8 @@ export class Game extends Game3D {
 
     UnitSize = BASE_UNIT_SIZE;
 
-    DraggedEntity: Entity | null = null;
+    HoverEntity: Entity | null = null;
+    ActiveEntity: Entity | null = null;
 
     /**
      * A typed array with instance data, suitable for passing to `gl.bufferData`.

@@ -35,32 +35,43 @@ export function sys_control_grab(game: Game, delta: number) {
     let pointer2d: Vec2 = [pointer3d[0], pointer3d[1]];
     transform_point(pointer_position, pointer2d, camera_transform.World);
 
-    if (game.DraggedEntity !== null) {
+    if (game.ActiveEntity !== null) {
         if (game.InputDelta["Mouse0"] === -1) {
             document.body.classList.remove("grabbing");
-            game.DraggedEntity = null;
+            game.ActiveEntity = null;
             return;
         }
 
-        let entity_transform = game.World.Transform2D[game.DraggedEntity];
+        let entity_transform = game.World.Transform2D[game.ActiveEntity];
         copy(entity_transform.Translation, pointer_position);
         subtract(entity_transform.Translation, entity_transform.Translation, pointer_offset);
-        game.World.Signature[game.DraggedEntity] |= Has.Dirty;
+        game.World.Signature[game.ActiveEntity] |= Has.Dirty;
         return;
     }
 
+    game.HoverEntity = null;
     for (let ent = 0; ent < game.World.Signature.length; ent++) {
         if ((game.World.Signature[ent] & QUERY) === QUERY) {
             let entity_transform = game.World.Transform2D[ent];
             if (is_pointer_over(pointer_position, entity_transform)) {
+                game.HoverEntity = ent;
                 document.body.classList.add("grab");
                 if (game.InputDelta["Mouse0"] === 1) {
                     document.body.classList.add("grabbing");
-                    game.DraggedEntity = ent;
+                    game.ActiveEntity = ent;
 
                     let dragged_transform = game.World.Transform2D[ent];
                     subtract(pointer_offset, pointer_position, dragged_transform.Translation);
                 }
+
+                if (game.InputDelta["WheelY"]) {
+                    let transform = game.World.Transform2D[ent];
+                    transform.Rotation -= game.InputDelta["WheelY"] * 0.1;
+                    transform.Rotation %= 360;
+                    game.World.Signature[ent] |= Has.Dirty;
+                }
+
+                // The first hover entity is the one that gets the focus.
                 return;
             }
         }
