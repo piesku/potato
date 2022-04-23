@@ -55,13 +55,15 @@ function update(game: Game, entity: Entity) {
             if (other.Layer & Layer.PotatoBoil) {
                 render2d("ziemniak_surowy", hsva_to_vec4(float(0, 0.1), 1, 1, 1))(game, entity);
                 transform.Rotation = element(rotations);
-                collide.Mask = Layer.PotatoPeel;
+                collide.Mask &= ~Layer.PotatoBoil;
+                collide.Mask |= Layer.PotatoPeel;
                 break;
             }
             if (other.Layer & Layer.PotatoPeel) {
                 render2d("ziemniak_obrany")(game, entity);
                 transform.Rotation = element(rotations);
-                collide.Mask = Layer.PotatoCut;
+                collide.Mask &= ~Layer.PotatoPeel;
+                collide.Mask |= Layer.PotatoCut;
                 break;
             }
             if (other.Layer & Layer.PotatoCut) {
@@ -69,7 +71,8 @@ function update(game: Game, entity: Entity) {
                 transform.Scale[0] = 0.5;
                 transform.Scale[1] = 0.5;
                 transform.Rotation = element(rotations);
-                collide.Mask = Layer.Bowl;
+                collide.Mask &= ~Layer.PotatoCut;
+                collide.Mask |= Layer.Bowl;
                 collide.Radius = 0.5;
                 break;
             }
