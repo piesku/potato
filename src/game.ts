@@ -45,6 +45,10 @@ export class Game extends Game3D {
     HoverEntity: Entity | null = null;
     ActiveEntity: Entity | null = null;
 
+    // Config.
+    spawnInterval = 1;
+    spawnCount = 1;
+
     ItemCount = 0;
 
     /**

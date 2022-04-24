@@ -32,8 +32,11 @@ export function scene_stage(game: Game) {
         children(
             [transform2d(undefined, 0, [4, 3]), render2d("karton"), order(0)],
             [transform2d(undefined, 0, [4, 3]), render2d("karton_front"), order(1)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato, 0)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato, 0)]
+            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato)],
+            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato)],
+            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato)],
+            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato)],
+            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato)]
         ),
     ]);
 

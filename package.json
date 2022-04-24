@@ -23,6 +23,8 @@
         "ts:watch": "tsc --noEmit --watch -p ."
     },
     "devDependencies": {
+        "@types/dat.gui": "^0.7.7",
+        "dat.gui": "^0.7.9",
         "esbuild": "0.14",
         "htmlnano": "1.1",
         "posthtml-cli": "0.10",

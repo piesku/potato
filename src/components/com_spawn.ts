@@ -23,7 +23,7 @@ export interface Spawn {
  * @param creator The function returning the blueprint to spawn.
  * @param interval The frequency of spawning.
  */
-export function spawn(creator: Creator, interval: number) {
+export function spawn(creator: Creator, interval: number = 1) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.Spawn;
         game.World.Spawn[entity] = {
