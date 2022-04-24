@@ -23,7 +23,10 @@ import {sys_physics2d_integrate} from "./systems/sys_physics2d_integrate.js";
 import {sys_physics2d_resolve} from "./systems/sys_physics2d_resolve.js";
 import {sys_render2d} from "./systems/sys_render2d.js";
 import {sys_resize2d} from "./systems/sys_resize2d.js";
+import {sys_shake2d} from "./systems/sys_shake2d.js";
+import {sys_spawn2d} from "./systems/sys_spawn2d.js";
 import {sys_transform2d} from "./systems/sys_transform2d.js";
+import {sys_ui} from "./systems/sys_ui.js";
 import {World} from "./world.js";
 
 export const WORLD_CAPACITY = 50_100;
@@ -41,6 +44,8 @@ export class Game extends Game3D {
 
     HoverEntity: Entity | null = null;
     ActiveEntity: Entity | null = null;
+
+    ItemCount = 0;
 
     /**
      * A typed array with instance data, suitable for passing to `gl.bufferData`.
@@ -158,6 +163,10 @@ export class Game extends Game3D {
 
         sys_draw_background(this, delta);
         sys_render2d(this, delta);
+        sys_ui(this, delta);
+
+        sys_shake2d(this, delta);
+        sys_spawn2d(this, delta);
     }
 }
 

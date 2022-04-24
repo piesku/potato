@@ -53,39 +53,51 @@
         "width": 128,
         "height": 96
     },
-    "../assets/platform1.png": {
+    "../assets/karton.png": {
         "x": 0,
+        "y": 288,
+        "width": 128,
+        "height": 96
+    },
+    "../assets/karton_front.png": {
+        "x": 128,
+        "y": 288,
+        "width": 128,
+        "height": 96
+    },
+    "../assets/platform1.png": {
+        "x": 256,
         "y": 288,
         "width": 128,
         "height": 32
     },
     "../assets/sloik.png": {
-        "x": 0,
+        "x": 256,
         "y": 320,
         "width": 64,
         "height": 64
     },
     "../assets/ziemniak_kawalek1.png": {
-        "x": 192,
-        "y": 288,
+        "x": 320,
+        "y": 352,
         "width": 16,
         "height": 16
     },
     "../assets/ziemniak_kawalek2.png": {
-        "x": 208,
-        "y": 288,
+        "x": 336,
+        "y": 352,
         "width": 16,
         "height": 16
     },
     "../assets/ziemniak_obrany.png": {
-        "x": 128,
-        "y": 288,
+        "x": 320,
+        "y": 320,
         "width": 32,
         "height": 32
     },
     "../assets/ziemniak_surowy.png": {
-        "x": 160,
-        "y": 288,
+        "x": 352,
+        "y": 320,
         "width": 32,
         "height": 32
     }

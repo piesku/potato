@@ -9,6 +9,8 @@ import {ControlProcess} from "./components/com_control_process.js";
 import {Move2D} from "./components/com_move2d.js";
 import {Render2D} from "./components/com_render2d.js";
 import {RigidBody2D} from "./components/com_rigid_body2d.js";
+import {Shake} from "./components/com_shake.js";
+import {Spawn} from "./components/com_spawn.js";
 import {Transform2D} from "./components/com_transform2d.js";
 
 const enum Component {
@@ -25,6 +27,8 @@ const enum Component {
     Move2D,
     Render2D,
     RigidBody2D,
+    Shake,
+    Spawn,
     Transform2D,
 }
 
@@ -43,6 +47,8 @@ export const enum Has {
     Move2D = 1 << Component.Move2D,
     Render2D = 1 << Component.Render2D,
     RigidBody2D = 1 << Component.RigidBody2D,
+    Shake = 1 << Component.Shake,
+    Spawn = 1 << Component.Spawn,
     Transform2D = 1 << Component.Transform2D,
 }
 
@@ -58,5 +64,7 @@ export class World extends WorldImpl {
     Move2D: Array<Move2D> = [];
     Render2D: Array<Render2D> = [];
     RigidBody2D: Array<RigidBody2D> = [];
+    Shake: Array<Shake> = [];
+    Spawn: Array<Spawn> = [];
     Transform2D: Array<Transform2D> = [];
 }

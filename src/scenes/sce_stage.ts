@@ -1,19 +1,20 @@
-import {hsva_to_vec4} from "../../common/color.js";
 import {instantiate} from "../../common/game.js";
 import {orthographic} from "../../common/projection.js";
 import {float} from "../../common/random.js";
 import {animate_sprite} from "../components/com_animate_sprite.js";
 import {camera_canvas} from "../components/com_camera.js";
 import {children} from "../components/com_children.js";
-import {collide_dynamic, collide_static} from "../components/com_collide2d.js";
+import {collide_static} from "../components/com_collide2d.js";
 import {control_player} from "../components/com_control_player.js";
-import {control_process} from "../components/com_control_process.js";
 import {grabbable} from "../components/com_grabbable.js";
 import {order, render2d} from "../components/com_render2d.js";
 import {RigidKind, rigid_body2d} from "../components/com_rigid_body2d.js";
+import {shake} from "../components/com_shake.js";
+import {spawn} from "../components/com_spawn.js";
 import {transform2d} from "../components/com_transform2d.js";
 import {Game, Layer, WORLD_CAPACITY} from "../game.js";
 import {World} from "../world.js";
+import {blueprint_potato} from "./blu_potato.js";
 
 export function scene_stage(game: Game) {
     game.World = new World(WORLD_CAPACITY);
@@ -24,6 +25,16 @@ export function scene_stage(game: Game) {
         transform2d([0, 0]),
         camera_canvas(orthographic(5, 1, 3), [0, 0, 0, 0]),
         control_player(),
+    ]);
+
+    instantiate(game, [
+        transform2d([0, 20]),
+        children(
+            [transform2d(undefined, 0, [4, 3]), render2d("karton"), order(0)],
+            [transform2d(undefined, 0, [4, 3]), render2d("karton_front"), order(1)],
+            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato, 0)],
+            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato, 0)]
+        ),
     ]);
 
     instantiate(game, [
@@ -115,20 +126,11 @@ export function scene_stage(game: Game) {
         grabbable(),
     ]);
 
-    let dynamic_count = 10000;
+    let dynamic_count = 0;
     for (let i = 0; i < dynamic_count; i++) {
         instantiate(game, [
+            ...blueprint_potato(game),
             transform2d([float(-3, 3), float(20, 100)], 0),
-            render2d(
-                "ziemniak_surowy",
-                hsva_to_vec4(float(0.1, 0.15), float(0, 0.5), float(0.5, 1), 1)
-            ),
-            control_process(Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut),
-            collide_dynamic(
-                1,
-                Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut
-            ),
-            rigid_body2d(RigidKind.Dynamic, float(0.99, 0.999)),
         ]);
     }
 }
