@@ -52,6 +52,7 @@ export class Game extends Game3D {
         super();
 
         this.Gl.pixelStorei(GL_UNPACK_FLIP_Y_WEBGL, true);
+        //this.Gl.enable(GL_BLEND);
 
         let material = this.MaterialInstanced;
 
@@ -170,7 +171,7 @@ export const enum Layer {
     None,
     Bowl = 1 << 0,
     Obstacle = 1 << 1,
-    PotatoBoil = 1 << 2,
-    PotatoPeel = 1 << 3,
-    PotatoCut = 1 << 4,
+    ProcessBoil = 1 << 2,
+    ProcessPeel = 1 << 3,
+    ProcessCut = 1 << 4,
 }

@@ -54,3 +54,20 @@ export function order(z: number) {
         game.InstanceData[instance_offset + 6] = z;
     };
 }
+
+export function set_sprite(game: Game, entity: Entity, sprite_name: string) {
+    let sprite_path = "../assets/" + sprite_name + ".png";
+    let instance_offset = entity * FLOATS_PER_INSTANCE;
+    game.InstanceData[instance_offset + 12] = spritesheet[sprite_path].x;
+    game.InstanceData[instance_offset + 13] = spritesheet[sprite_path].y;
+    game.InstanceData[instance_offset + 14] = spritesheet[sprite_path].width;
+    game.InstanceData[instance_offset + 15] = spritesheet[sprite_path].height;
+}
+
+export function set_color(game: Game, entity: Entity, color: Vec4) {
+    let instance_offset = entity * FLOATS_PER_INSTANCE;
+    game.InstanceData[instance_offset + 8] = color[0];
+    game.InstanceData[instance_offset + 9] = color[1];
+    game.InstanceData[instance_offset + 10] = color[2];
+    game.InstanceData[instance_offset + 11] = color[3];
+}
