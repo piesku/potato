@@ -2,6 +2,7 @@ import {hsva_to_vec4} from "../../common/color.js";
 import {instantiate} from "../../common/game.js";
 import {orthographic} from "../../common/projection.js";
 import {float} from "../../common/random.js";
+import {animate_sprite} from "../components/com_animate_sprite.js";
 import {camera_canvas} from "../components/com_camera.js";
 import {children} from "../components/com_children.js";
 import {collide_dynamic, collide_static} from "../components/com_collide2d.js";
@@ -31,7 +32,17 @@ export function scene_stage(game: Game) {
         order(1),
         grabbable(),
         children(
-            [transform2d(), render2d("garnek21"), order(0)],
+            [
+                transform2d(),
+                render2d("garnek21"),
+                order(0),
+                animate_sprite({
+                    garnek21: 0.1,
+                    garnek22: 0.1,
+                    garnek23: 0.1,
+                    garnek24: 0.1,
+                }),
+            ],
             [
                 transform2d([-0.4, 0]),
                 collide_static(Layer.Obstacle, 0.2, 0.4),

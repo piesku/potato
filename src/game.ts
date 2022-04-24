@@ -9,6 +9,7 @@ import {
 } from "../common/webgl.js";
 import {Entity} from "../common/world.js";
 import {mat_instanced2d} from "./materials/mat_instanced2d.js";
+import {sys_animate_sprite} from "./systems/sys_animate_sprite.js";
 import {sys_camera2d} from "./systems/sys_camera2d.js";
 import {sys_collide2d} from "./systems/sys_collide2d.js";
 import {sys_control_always2d} from "./systems/sys_control_always2d.js";
@@ -149,6 +150,7 @@ export class Game extends Game3D {
     override FrameUpdate(delta: number) {
         sys_control_always2d(this, delta);
 
+        sys_animate_sprite(this, delta);
         sys_move2d(this, delta);
 
         sys_resize2d(this, delta);

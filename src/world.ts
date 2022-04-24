@@ -1,4 +1,5 @@
 import {WorldImpl} from "../common/world.js";
+import {AnimateSprite} from "./components/com_animate_sprite.js";
 import {Camera} from "./components/com_camera.js";
 import {Children} from "./components/com_children.js";
 import {CollideDynamic, CollideStatic} from "./components/com_collide2d.js";
@@ -11,6 +12,7 @@ import {RigidBody2D} from "./components/com_rigid_body2d.js";
 import {Transform2D} from "./components/com_transform2d.js";
 
 const enum Component {
+    AnimateSprite,
     Camera,
     CollideDynamic,
     CollideStatic,
@@ -28,6 +30,7 @@ const enum Component {
 
 export const enum Has {
     None = 0,
+    AnimateSprite = 1 << Component.AnimateSprite,
     Camera = 1 << Component.Camera,
     CollideDynamic = 1 << Component.CollideDynamic,
     CollideStatic = 1 << Component.CollideStatic,
@@ -44,6 +47,7 @@ export const enum Has {
 }
 
 export class World extends WorldImpl {
+    AnimateSprite: Array<AnimateSprite> = [];
     Camera: Array<Camera> = [];
     CollideDynamic: Array<CollideDynamic> = [];
     CollideStatic: Array<CollideStatic> = [];
