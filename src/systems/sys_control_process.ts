@@ -84,7 +84,7 @@ function update(game: Game, entity: Entity) {
                     set_sprite(game, entity, "marchewka_kawalek" + integer(1, 2));
                     break;
                 case ProcessKind.Apple:
-                    set_sprite(game, entity, "ziemniak_kawalek" + integer(1, 2));
+                    set_sprite(game, entity, "jablko_kawalek" + integer(1, 2));
                     break;
             }
 
