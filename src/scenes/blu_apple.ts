@@ -10,7 +10,10 @@ export function blueprint_apple(game: Game) {
     return [
         render2d("jablko_surowe"),
         control_process(ProcessKind.Apple, Layer.ProcessPeel | Layer.ProcessCut),
-        collide_dynamic(1, Layer.Obstacle | Layer.ProcessPeel | Layer.ProcessCut),
+        collide_dynamic(
+            1,
+            Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut
+        ),
         rigid_body2d(RigidKind.Dynamic, float(0.99, 0.999)),
     ];
 }
