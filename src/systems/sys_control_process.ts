@@ -6,6 +6,7 @@ import {hsva_to_vec4} from "../../common/color.js";
 import {get_translation} from "../../common/mat2d.js";
 import {element, float, integer} from "../../common/random.js";
 import {Entity} from "../../common/world.js";
+import {ProcessKind} from "../components/com_control_process.js";
 import {set_color, set_sprite} from "../components/com_render2d.js";
 import {Game, Layer} from "../game.js";
 import {Has} from "../world.js";
@@ -48,8 +49,21 @@ function update(game: Game, entity: Entity) {
         }
 
         if (other.Layer & Layer.ProcessPeel) {
-            set_sprite(game, entity, "ziemniak_obrany");
             set_color(game, entity, [1, 1, 1, 1]);
+            switch (control.Kind) {
+                case ProcessKind.Potato:
+                    set_sprite(game, entity, "ziemniak_obrany");
+                    break;
+                case ProcessKind.Carrot:
+                    set_sprite(game, entity, "marchewka_obrana");
+                    break;
+                case ProcessKind.GreenPea:
+                    set_sprite(game, entity, "groszek_obrany");
+                    break;
+                case ProcessKind.Apple:
+                    set_sprite(game, entity, "jablko_obrane");
+                    break;
+            }
 
             let other_transform = game.World.Transform2D[other.EntityId];
             let parent_entity = other_transform.Parent;
@@ -66,8 +80,18 @@ function update(game: Game, entity: Entity) {
         }
 
         if (other.Layer & Layer.ProcessCut) {
-            set_sprite(game, entity, "ziemniak_kawalek" + integer(1, 2));
             set_color(game, entity, [1, 1, 1, 1]);
+            switch (control.Kind) {
+                case ProcessKind.Potato:
+                    set_sprite(game, entity, "ziemniak_kawalek" + integer(1, 2));
+                    break;
+                case ProcessKind.Carrot:
+                    set_sprite(game, entity, "marchewka_kawalek" + integer(1, 2));
+                    break;
+                case ProcessKind.Apple:
+                    set_sprite(game, entity, "ziemniak_kawalek" + integer(1, 2));
+                    break;
+            }
 
             let other_transform = game.World.Transform2D[other.EntityId];
             let parent_entity = other_transform.Parent;

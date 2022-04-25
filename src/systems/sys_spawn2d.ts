@@ -13,15 +13,9 @@ import {Has} from "../world.js";
 const QUERY = Has.Transform2D | Has.Spawn;
 
 export function sys_spawn2d(game: Game, delta: number) {
-    let spawned_this_frame = 0;
     for (let i = 0; i < game.World.Signature.length; i++) {
         if ((game.World.Signature[i] & QUERY) == QUERY) {
-            if (spawned_this_frame < game.spawnCount) {
-                update(game, i, delta);
-                spawned_this_frame++;
-            } else {
-                return;
-            }
+            update(game, i, delta);
         }
     }
 }
@@ -30,6 +24,10 @@ function update(game: Game, entity: Entity, delta: number) {
     let spawn = game.World.Spawn[entity];
 
     spawn.SinceLast += delta;
+    if (spawn.Counter > game.spawnCount) {
+        return;
+    }
+
     if (spawn.SinceLast > game.spawnInterval) {
         spawn.SinceLast = 0;
 

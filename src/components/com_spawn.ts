@@ -13,23 +13,17 @@ interface Creator {
 
 export interface Spawn {
     Creator: Creator;
-    Interval: number;
+    Counter: number;
     SinceLast: number;
 }
 
-/**
- * Spawn blueprints with a given frequency.
- *
- * @param creator The function returning the blueprint to spawn.
- * @param interval The frequency of spawning.
- */
-export function spawn(creator: Creator, interval: number = 1) {
+export function spawn(creator: Creator, counter: number) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.Spawn;
         game.World.Spawn[entity] = {
             Creator: creator,
-            Interval: interval,
-            SinceLast: interval,
+            Counter: counter,
+            SinceLast: 0,
         };
     };
 }

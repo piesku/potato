@@ -53,6 +53,30 @@
         "width": 128,
         "height": 96
     },
+    "../assets/groszek_obrany.png": {
+        "x": 96,
+        "y": 384,
+        "width": 16,
+        "height": 16
+    },
+    "../assets/groszek_surowy.png": {
+        "x": 448,
+        "y": 320,
+        "width": 32,
+        "height": 32
+    },
+    "../assets/jablko_obrane.png": {
+        "x": 480,
+        "y": 320,
+        "width": 32,
+        "height": 32
+    },
+    "../assets/jablko_surowe.png": {
+        "x": 448,
+        "y": 352,
+        "width": 32,
+        "height": 32
+    },
     "../assets/karton.png": {
         "x": 0,
         "y": 288,
@@ -64,6 +88,30 @@
         "y": 288,
         "width": 128,
         "height": 96
+    },
+    "../assets/marchewka_kawalek1.png": {
+        "x": 112,
+        "y": 384,
+        "width": 16,
+        "height": 16
+    },
+    "../assets/marchewka_kawalek2.png": {
+        "x": 128,
+        "y": 384,
+        "width": 16,
+        "height": 16
+    },
+    "../assets/marchewka_obrana.png": {
+        "x": 480,
+        "y": 352,
+        "width": 32,
+        "height": 32
+    },
+    "../assets/marchewka_surowa.png": {
+        "x": 0,
+        "y": 384,
+        "width": 32,
+        "height": 32
     },
     "../assets/obieraczka.png": {
         "x": 256,
@@ -102,26 +150,26 @@
         "height": 96
     },
     "../assets/ziemniak_kawalek1.png": {
-        "x": 448,
-        "y": 352,
+        "x": 144,
+        "y": 384,
         "width": 16,
         "height": 16
     },
     "../assets/ziemniak_kawalek2.png": {
-        "x": 464,
-        "y": 352,
+        "x": 160,
+        "y": 384,
         "width": 16,
         "height": 16
     },
     "../assets/ziemniak_obrany.png": {
-        "x": 448,
-        "y": 320,
+        "x": 32,
+        "y": 384,
         "width": 32,
         "height": 32
     },
     "../assets/ziemniak_surowy.png": {
-        "x": 480,
-        "y": 320,
+        "x": 64,
+        "y": 384,
         "width": 32,
         "height": 32
     }
