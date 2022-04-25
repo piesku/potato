@@ -59,17 +59,29 @@ function update(game: Game, entity: Entity) {
                 get_translation(transform.Translation, exit_transform.World);
             }
 
-            rigid_body.Acceleration[0] = 300;
             transform.Rotation = element(rotations);
+
+            rigid_body.Acceleration[0] = 300;
             return;
         }
 
         if (other.Layer & Layer.ProcessCut) {
             set_sprite(game, entity, "ziemniak_kawalek" + integer(1, 2));
             set_color(game, entity, [1, 1, 1, 1]);
+
+            let other_transform = game.World.Transform2D[other.EntityId];
+            let parent_entity = other_transform.Parent;
+            if (parent_entity !== undefined) {
+                let exit_entity = game.World.Children[parent_entity].Children[0];
+                let exit_transform = game.World.Transform2D[exit_entity];
+                get_translation(transform.Translation, exit_transform.World);
+            }
+
             transform.Scale[0] = 0.5;
             transform.Scale[1] = 0.5;
             transform.Rotation = element(rotations);
+
+            rigid_body.Acceleration[0] = float(-200, 200);
             collide.Radius = 0.5;
             return;
         }
