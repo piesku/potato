@@ -48,6 +48,9 @@ export class Game extends Game3D {
     // Config.
     spawnInterval = 1;
     spawnCount = 1;
+    physicsGravity = 9.81;
+    physicsFriction = 0;
+    physicsBounce = 1;
 
     ItemCount = 0;
 

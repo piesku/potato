@@ -14,6 +14,6 @@ export function blueprint_greenpea(game: Game) {
             1,
             Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut
         ),
-        rigid_body2d(RigidKind.Dynamic, float(0.99, 0.999)),
+        rigid_body2d(RigidKind.Dynamic, float(0.01, 0.001)),
     ];
 }

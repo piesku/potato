@@ -29,7 +29,7 @@ function update(game: Game, entity: Entity, delta: number) {
         if (transform.Translation[1] < bottom) {
             transform.Translation[1] = bottom;
             rigid_body.VelocityResolved[0] = float(-3, 3);
-            rigid_body.VelocityResolved[1] *= float(-1.1, -1);
+            rigid_body.VelocityResolved[1] *= game.physicsBounce * -1;
         }
 
         if (transform.Translation[0] < left) {

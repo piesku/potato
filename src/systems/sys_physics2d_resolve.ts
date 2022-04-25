@@ -36,12 +36,11 @@ function update(game: Game, entity: Entity) {
             add(transform.Translation, transform.Translation, response_translation);
             game.World.Signature[entity] |= Has.Dirty;
 
-            let other_rigid_body = game.World.RigidBody2D[collide.ContactId];
             let response_magnitude = dot(rigid_body.VelocityIntegrated, collide.ContactNormal);
             scale(
                 response_velocity,
                 collide.ContactNormal,
-                -response_magnitude * other_rigid_body.Friction
+                -response_magnitude * game.physicsBounce
             );
             add(rigid_body.VelocityResolved, rigid_body.VelocityIntegrated, response_velocity);
         } else {
