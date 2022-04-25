@@ -9,13 +9,12 @@ import {Game, Layer} from "../game.js";
 
 export function blueprint_cutter(game: Game) {
     return [
-        render2d("szatkownica_front"),
-        order(1),
         grabbable(),
         children(
             // Child 0: Exit.
             [transform2d([0, -0.4]), shake([0.25, 0.1])],
-            [transform2d(), render2d("szatkownica"), order(0)],
+            [transform2d(), shake([0.01, 0.01]), render2d("szatkownica"), order(0)],
+            [transform2d(), shake([0.01, 0.01]), render2d("szatkownica_front"), order(1)],
             [transform2d([0, -0.2]), collide_static(Layer.ProcessCut, 1)],
             [
                 transform2d([-0.3, 0], -30),

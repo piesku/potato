@@ -3,18 +3,18 @@ import {collide_static} from "../components/com_collide2d.js";
 import {grabbable} from "../components/com_grabbable.js";
 import {order, render2d} from "../components/com_render2d.js";
 import {RigidKind, rigid_body2d} from "../components/com_rigid_body2d.js";
+import {shake} from "../components/com_shake.js";
 import {transform2d} from "../components/com_transform2d.js";
 import {Game, Layer} from "../game.js";
 
 export function blueprint_peeler(game: Game) {
     return [
-        render2d("obieraczka_front"),
-        order(1),
         grabbable(),
         children(
             // Child 0: Exit.
             [transform2d([0.25, -0.25])],
-            [transform2d(), render2d("obieraczka"), order(0)],
+            [transform2d(), shake([0.001, 0.01]), render2d("obieraczka"), order(0)],
+            [transform2d(), shake([0.001, 0.01]), render2d("obieraczka_front"), order(1)],
             [transform2d([0, -0.2]), collide_static(Layer.ProcessPeel, 1)],
             [
                 transform2d([-0.2, 0]),
