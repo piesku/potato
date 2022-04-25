@@ -103,7 +103,7 @@ function update(game: Game, entity: Entity) {
             collide.Radius = 0.5;
             return;
         }
-    } else {
+    } else if (other.Layer > Layer.Obstacle) {
         // The ingredient is not supported by the current process. Eject it.
         rigid_body.Acceleration[0] = float(-200, 200);
         rigid_body.Acceleration[1] = float(200, 300);
