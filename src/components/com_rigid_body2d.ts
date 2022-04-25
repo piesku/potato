@@ -3,6 +3,7 @@
  */
 
 import {Vec2} from "../../common/math.js";
+import {float} from "../../common/random.js";
 import {Entity} from "../../common/world.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
@@ -20,6 +21,7 @@ export interface RigidBody2D {
     Acceleration: Vec2;
     VelocityIntegrated: Vec2;
     VelocityResolved: Vec2;
+    VelocityAngular: number;
 }
 
 export function rigid_body2d(kind: RigidKind, friction: number) {
@@ -31,6 +33,7 @@ export function rigid_body2d(kind: RigidKind, friction: number) {
             Acceleration: [0, 0],
             VelocityIntegrated: [0, 0],
             VelocityResolved: [0, 0],
+            VelocityAngular: float(-180, 180),
         };
     };
 }

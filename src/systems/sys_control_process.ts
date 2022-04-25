@@ -4,7 +4,7 @@
 
 import {hsva_to_vec4} from "../../common/color.js";
 import {get_translation} from "../../common/mat2d.js";
-import {element, float, integer} from "../../common/random.js";
+import {float, integer} from "../../common/random.js";
 import {Entity} from "../../common/world.js";
 import {ProcessKind} from "../components/com_control_process.js";
 import {set_color, set_sprite} from "../components/com_render2d.js";
@@ -20,8 +20,6 @@ export function sys_control_process(game: Game, delta: number) {
         }
     }
 }
-
-const rotations = [0, 90, 180, 270];
 
 function update(game: Game, entity: Entity) {
     let control = game.World.ControlProcess[entity];
@@ -44,7 +42,6 @@ function update(game: Game, entity: Entity) {
 
         if (other.Layer & Layer.ProcessBoil) {
             set_color(game, entity, hsva_to_vec4(float(0, 0.1), 1, 1, 1));
-            transform.Rotation = element(rotations);
             return;
         }
 
@@ -72,8 +69,6 @@ function update(game: Game, entity: Entity) {
                 let exit_transform = game.World.Transform2D[exit_entity];
                 get_translation(transform.Translation, exit_transform.World);
             }
-
-            transform.Rotation = element(rotations);
 
             rigid_body.Acceleration[0] = 300;
             return;
@@ -103,7 +98,6 @@ function update(game: Game, entity: Entity) {
 
             transform.Scale[0] = 0.5;
             transform.Scale[1] = 0.5;
-            transform.Rotation = element(rotations);
 
             rigid_body.Acceleration[0] = float(-200, 200);
             collide.Radius = 0.5;
