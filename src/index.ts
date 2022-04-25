@@ -57,6 +57,7 @@ gui_spawn.add(game, "spawnInterval", 0, 1).step(0.01).name("Interval (s)");
 gui_spawn.add(game, "spawnCount", 0, 5).step(1).name("Multiplier");
 
 let gui_physics = gui.addFolder("Physics");
+gui_physics.add(game, "physicsCollisions").name("Enable Collisions");
 gui_physics.add(game, "physicsGravity", 0, 20).step(0.01).listen().name("Gravity");
 gui_physics.add(game, "physicsFriction", 0, 1).step(0.01).listen().name("Friction");
 gui_physics.add(game, "physicsBounce", 0, 3).step(0.01).listen().name("Bounciness");

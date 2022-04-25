@@ -51,6 +51,7 @@ export class Game extends Game3D {
     physicsGravity = 9.81;
     physicsFriction = 0;
     physicsBounce = 1;
+    physicsCollisions = true;
 
     ItemCount = 0;
 
@@ -152,7 +153,11 @@ export class Game extends Game3D {
         sys_physics2d_bounds(this, delta);
         sys_physics2d_integrate(this, delta);
         sys_transform2d(this, delta);
-        sys_collide2d(this, delta);
+
+        if (this.physicsCollisions) {
+            sys_collide2d(this, delta);
+        }
+
         sys_physics2d_resolve(this, delta);
         sys_transform2d(this, delta);
 
