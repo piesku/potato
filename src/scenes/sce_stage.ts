@@ -77,6 +77,8 @@ export function scene_stage(game: Game) {
         order(1),
         grabbable(),
         children(
+            // Child 0: Exit.
+            [transform2d([0.25, -0.25])],
             [transform2d(), render2d("obieraczka"), order(0)],
             [transform2d([0, -0.2]), collide_static(Layer.ProcessPeel, 1)],
             [
@@ -85,8 +87,8 @@ export function scene_stage(game: Game) {
                 rigid_body2d(RigidKind.Static, 1),
             ],
             [
-                transform2d([0.2, 0]),
-                collide_static(Layer.Obstacle, 0.3, 0.5),
+                transform2d([0.2, 0.1]),
+                collide_static(Layer.Obstacle, 0.3, 0.3),
                 rigid_body2d(RigidKind.Static, 1),
             ]
         ),

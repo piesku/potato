@@ -3,6 +3,7 @@
  */
 
 import {hsva_to_vec4} from "../../common/color.js";
+import {get_translation} from "../../common/mat2d.js";
 import {element, float, integer} from "../../common/random.js";
 import {Entity} from "../../common/world.js";
 import {set_color, set_sprite} from "../components/com_render2d.js";
@@ -36,6 +37,7 @@ function update(game: Game, entity: Entity) {
         control.Needs &= ~other.Layer;
         collide.Mask &= ~other.Layer;
 
+        game.World.Signature[entity] |= Has.Dirty;
         rigid_body.VelocityResolved[0] = 0;
         rigid_body.VelocityResolved[1] = 0;
 
@@ -48,6 +50,16 @@ function update(game: Game, entity: Entity) {
         if (other.Layer & Layer.ProcessPeel) {
             set_sprite(game, entity, "ziemniak_obrany");
             set_color(game, entity, [1, 1, 1, 1]);
+
+            let other_transform = game.World.Transform2D[other.EntityId];
+            let parent_entity = other_transform.Parent;
+            if (parent_entity !== undefined) {
+                let exit_entity = game.World.Children[parent_entity].Children[0];
+                let exit_transform = game.World.Transform2D[exit_entity];
+                get_translation(transform.Translation, exit_transform.World);
+            }
+
+            rigid_body.Acceleration[0] = 300;
             transform.Rotation = element(rotations);
             return;
         }
