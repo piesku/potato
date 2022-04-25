@@ -40,11 +40,11 @@ export function scene_stage(game: Game) {
             [transform2d([-1, 0.5], 180), render2d("ziemniak_surowy"), order(1)],
             [transform2d(undefined, 0, [4, 3]), render2d("karton"), order(0)],
             [transform2d(undefined, 0, [4, 3]), render2d("karton_front"), order(1)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato, 1)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato, 2)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato, 3)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato, 4)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_potato, 5)]
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_potato, 1)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_potato, 2)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_potato, 3)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_potato, 4)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_potato, 5)]
         ),
     ]);
 
@@ -56,11 +56,11 @@ export function scene_stage(game: Game) {
             [transform2d([-1, 0.5], 180), render2d("marchewka_surowa"), order(1)],
             [transform2d(undefined, 0, [4, 3]), render2d("karton"), order(0)],
             [transform2d(undefined, 0, [4, 3]), render2d("karton_front"), order(1)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_carrot, 1)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_carrot, 2)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_carrot, 3)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_carrot, 4)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_carrot, 5)]
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_carrot, 1)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_carrot, 2)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_carrot, 3)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_carrot, 4)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_carrot, 5)]
         ),
     ]);
 
@@ -72,11 +72,11 @@ export function scene_stage(game: Game) {
             [transform2d([-1, 0.5], 180), render2d("groszek_surowy"), order(1)],
             [transform2d(undefined, 0, [4, 3]), render2d("karton"), order(0)],
             [transform2d(undefined, 0, [4, 3]), render2d("karton_front"), order(1)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_greenpea, 1)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_greenpea, 2)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_greenpea, 3)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_greenpea, 4)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_greenpea, 5)]
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_greenpea, 1)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_greenpea, 2)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_greenpea, 3)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_greenpea, 4)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_greenpea, 5)]
         ),
     ]);
 
@@ -88,11 +88,11 @@ export function scene_stage(game: Game) {
             [transform2d([-1, 0.5], 180), render2d("jablko_surowe"), order(1)],
             [transform2d(undefined, 0, [4, 3]), render2d("karton"), order(0)],
             [transform2d(undefined, 0, [4, 3]), render2d("karton_front"), order(1)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_apple, 1)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_apple, 2)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_apple, 3)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_apple, 4)],
-            [transform2d(), shake([1.4, 0.9]), spawn(blueprint_apple, 5)]
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_apple, 1)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_apple, 2)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_apple, 3)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_apple, 4)],
+            [transform2d(), shake([1.3, 0.8]), spawn(blueprint_apple, 5)]
         ),
     ]);
 
