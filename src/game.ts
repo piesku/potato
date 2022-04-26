@@ -48,6 +48,7 @@ export class Game extends Game3D {
     ActiveEntity: Entity | null = null;
 
     // Config.
+    spawnEnabled = false;
     spawnInterval = 1;
     spawnCount = 1;
     physicsGravity = 9.81;
@@ -152,25 +153,31 @@ export class Game extends Game3D {
         sys_control_grab(this, delta);
         sys_control_camera(this, delta);
 
-        sys_physics2d_bounds(this, delta);
-        sys_physics2d_integrate(this, delta);
-        sys_transform2d(this, delta);
+        if (this.spawnEnabled) {
+            sys_physics2d_bounds(this, delta);
+            sys_physics2d_integrate(this, delta);
+            sys_transform2d(this, delta);
 
-        if (this.physicsCollisions) {
-            sys_collide2d(this, delta);
+            if (this.physicsCollisions) {
+                sys_collide2d(this, delta);
+            }
+
+            sys_physics2d_resolve(this, delta);
         }
 
-        sys_physics2d_resolve(this, delta);
         sys_transform2d(this, delta);
-
         sys_control_process(this, delta);
     }
 
     override FrameUpdate(delta: number) {
         sys_control_always2d(this, delta);
 
-        sys_animate_sprite(this, delta);
-        sys_move2d(this, delta);
+        if (this.spawnEnabled) {
+            sys_animate_sprite(this, delta);
+            sys_move2d(this, delta);
+            sys_shake2d(this, delta);
+            sys_spawn2d(this, delta);
+        }
 
         sys_resize2d(this, delta);
         sys_camera2d(this, delta);
@@ -178,9 +185,6 @@ export class Game extends Game3D {
         sys_draw_background(this, delta);
         sys_render2d(this, delta);
         sys_ui(this, delta);
-
-        sys_shake2d(this, delta);
-        sys_spawn2d(this, delta);
     }
 
     Restart() {
