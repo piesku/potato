@@ -1,9 +1,7 @@
 import * as dat from "dat.gui";
 import {create_texture_from, fetch_image} from "../common/texture.js";
-import {destroy_all} from "./components/com_children.js";
 import {Game} from "./game.js";
 import {scene_stage} from "./scenes/sce_stage.js";
-import {Has} from "./world.js";
 
 let game = new Game();
 
@@ -30,12 +28,7 @@ let sim = {
     },
 
     restart() {
-        game.ItemCount = 0;
-        for (let ent = 0; ent < game.World.Signature.length; ent++) {
-            if (game.World.Signature[ent] & Has.ControlProcess) {
-                destroy_all(game.World, ent);
-            }
-        }
+        game.Restart();
     },
 
     physicsReset() {

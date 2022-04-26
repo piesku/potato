@@ -8,6 +8,7 @@ import {
     GL_UNPACK_FLIP_Y_WEBGL,
 } from "../common/webgl.js";
 import {Entity} from "../common/world.js";
+import {destroy_all} from "./components/com_children.js";
 import {mat_instanced2d} from "./materials/mat_instanced2d.js";
 import {sys_animate_sprite} from "./systems/sys_animate_sprite.js";
 import {sys_camera2d} from "./systems/sys_camera2d.js";
@@ -27,7 +28,7 @@ import {sys_shake2d} from "./systems/sys_shake2d.js";
 import {sys_spawn2d} from "./systems/sys_spawn2d.js";
 import {sys_transform2d} from "./systems/sys_transform2d.js";
 import {sys_ui} from "./systems/sys_ui.js";
-import {World} from "./world.js";
+import {Has, World} from "./world.js";
 
 export const WORLD_CAPACITY = 50_100;
 export const FLOATS_PER_INSTANCE = 16;
@@ -179,6 +180,15 @@ export class Game extends Game3D {
 
         sys_shake2d(this, delta);
         sys_spawn2d(this, delta);
+    }
+
+    Restart() {
+        this.ItemCount = 0;
+        for (let ent = 0; ent < this.World.Signature.length; ent++) {
+            if (this.World.Signature[ent] & Has.ControlProcess) {
+                destroy_all(this.World, ent);
+            }
+        }
     }
 }
 

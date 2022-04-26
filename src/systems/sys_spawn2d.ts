@@ -35,6 +35,13 @@ function update(game: Game, entity: Entity, delta: number) {
         let world_position: Vec2 = [0, 0];
         get_translation(world_position, entity_transform.World);
 
-        instantiate(game, [...spawn.Creator(game), transform2d(world_position, 0)]);
+        if (game.World.Signature.length - game.World.Graveyard.length < game.World.Capacity) {
+            instantiate(game, [...spawn.Creator(game), transform2d(world_position, 0)]);
+        } else {
+            alert(
+                `The world is full! You've reached the maximum number of entities allowed in the game (${game.World.Capacity}). Press OK to restart the simulation.`
+            );
+            game.Restart();
+        }
     }
 }
