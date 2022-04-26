@@ -1,6 +1,9 @@
 import * as dat from "dat.gui";
+import {instantiate} from "../common/game.js";
 import {create_texture_from, fetch_image} from "../common/texture.js";
+import {transform2d} from "./components/com_transform2d.js";
 import {Game} from "./game.js";
+import {blueprint_board1} from "./scenes/blu_board1.js";
 import {scene_stage} from "./scenes/sce_stage.js";
 import {scene_title} from "./scenes/sce_title.js";
 
@@ -53,6 +56,10 @@ window.playNow = function () {
             game.physicsFriction = 0;
             game.physicsBounce = 1.1;
         },
+
+        addPlank() {
+            instantiate(game, [transform2d([0, 0], -45, [4, 1]), ...blueprint_board1(game)]);
+        },
     };
 
     let gui = new dat.GUI();
@@ -62,7 +69,11 @@ window.playNow = function () {
     gui_sim.add(sim, "restart").name("Restart");
     gui_sim.open();
 
-    let gui_spawn = gui.addFolder("Spawning");
+    let gui_objects = gui.addFolder("Utensils");
+    gui_objects.add(sim, "addPlank").name("Cutting Board");
+    gui_objects.open();
+
+    let gui_spawn = gui.addFolder("Ingredients");
     gui_spawn.add(game, "spawnInterval", 0, 1).step(0.01).name("Interval (s)");
     gui_spawn.add(game, "spawnCount", 1, 5).step(1).name("Multiplier");
 

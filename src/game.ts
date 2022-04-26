@@ -208,9 +208,9 @@ let vertex_arr = Float32Array.from([
 
 export const enum Layer {
     None,
-    Bowl = 1 << 0,
-    Obstacle = 1 << 1,
-    ProcessBoil = 1 << 2,
-    ProcessPeel = 1 << 3,
-    ProcessCut = 1 << 4,
+    Obstacle = 1 << 0,
+    ProcessCook = 1 << 1,
+    ProcessPeel = 1 << 2,
+    ProcessCut = 1 << 3,
+    ProcessFinish = 1 << 4,
 }

@@ -12,6 +12,7 @@ import {Game, WORLD_CAPACITY} from "../game.js";
 import {World} from "../world.js";
 import {blueprint_apple} from "./blu_apple.js";
 import {blueprint_board1} from "./blu_board1.js";
+import {blueprint_bowl} from "./blu_bowl.js";
 import {blueprint_carrot} from "./blu_carrot.js";
 import {blueprint_cooker} from "./blu_cooker.js";
 import {blueprint_cutter} from "./blu_cutter.js";
@@ -95,13 +96,13 @@ export function scene_stage(game: Game) {
         ),
     ]);
 
-    for (let i = 0; i < 5; i++) {
-        instantiate(game, [transform2d([-10 + i * 5, 0], -45, [4, 1]), ...blueprint_board1(game)]);
-    }
+    instantiate(game, [transform2d([-3, 0], -45, [4, 1]), ...blueprint_board1(game)]);
+    instantiate(game, [transform2d([3, 0], -45, [4, 1]), ...blueprint_board1(game)]);
 
     instantiate(game, [...blueprint_cooker(game), transform2d([-5, -5], 0, [4, 3])]);
     instantiate(game, [...blueprint_peeler(game), transform2d([0, -5], 0, [4, 3])]);
     instantiate(game, [...blueprint_cutter(game), transform2d([5, -5], 0, [4, 3])]);
     instantiate(game, [...blueprint_cooker(game), transform2d([-5, -10], 0, [4, 3])]);
     instantiate(game, [...blueprint_peeler(game), transform2d([0, -10], 0, [4, 3])]);
+    instantiate(game, [...blueprint_bowl(game), transform2d([5, -10], 0, [4, 3])]);
 }

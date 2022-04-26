@@ -9,10 +9,14 @@ export function blueprint_greenpea(game: Game) {
     game.ItemCount++;
     return [
         render2d("groszek_surowy"),
-        control_process(ProcessKind.GreenPea, Layer.ProcessBoil),
+        control_process(ProcessKind.GreenPea, Layer.ProcessCook),
         collide_dynamic(
             1,
-            Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut
+            Layer.Obstacle |
+                Layer.ProcessCook |
+                Layer.ProcessPeel |
+                Layer.ProcessCut |
+                Layer.ProcessFinish
         ),
         rigid_body2d(RigidKind.Dynamic, float(0.01, 0.001)),
     ];

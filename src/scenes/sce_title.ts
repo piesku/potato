@@ -11,7 +11,7 @@ import {transform2d} from "../components/com_transform2d.js";
 import {Game, WORLD_CAPACITY} from "../game.js";
 import {World} from "../world.js";
 import {blueprint_board1} from "./blu_board1.js";
-import {blueprint_cooker} from "./blu_cooker.js";
+import {blueprint_bowl} from "./blu_bowl.js";
 import {blueprint_potato} from "./blu_potato.js";
 
 export function scene_title(game: Game) {
@@ -41,5 +41,5 @@ export function scene_title(game: Game) {
     instantiate(game, [transform2d([3.5, -1], -45, [4, 1]), ...blueprint_board1(game)]);
     instantiate(game, [transform2d([8, -5], 45, [4, 1]), ...blueprint_board1(game)]);
 
-    instantiate(game, [...blueprint_cooker(game), transform2d([4, -10], 0, [4, 3])]);
+    instantiate(game, [...blueprint_bowl(game), transform2d([4, -10], 0, [4, 3])]);
 }

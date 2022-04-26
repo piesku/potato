@@ -39,7 +39,7 @@ function update(game: Game, entity: Entity) {
         rigid_body.VelocityResolved[0] = 0;
         rigid_body.VelocityResolved[1] = 0;
 
-        if (other.Layer & Layer.ProcessBoil) {
+        if (other.Layer & Layer.ProcessCook) {
             set_color(game, entity, [1, 1, 1, 1]);
             switch (control.Kind) {
                 case ProcessKind.Potato:
@@ -72,7 +72,7 @@ function update(game: Game, entity: Entity) {
             set_color(game, entity, [1, 1, 1, 1]);
             switch (control.Kind) {
                 case ProcessKind.Potato:
-                    if (control.Needs & Layer.ProcessBoil) {
+                    if (control.Needs & Layer.ProcessCook) {
                         set_sprite(game, entity, "ziemniak_obrany");
                     } else {
                         set_sprite(game, entity, "ziemniak_obrany_ugotowany");
@@ -80,7 +80,7 @@ function update(game: Game, entity: Entity) {
                     }
                     break;
                 case ProcessKind.Carrot:
-                    if (control.Needs & Layer.ProcessBoil) {
+                    if (control.Needs & Layer.ProcessCook) {
                         set_sprite(game, entity, "marchewka_obrana");
                     } else {
                         set_sprite(game, entity, "marchewka_obrana_ugotowana");
@@ -89,6 +89,7 @@ function update(game: Game, entity: Entity) {
                     break;
                 case ProcessKind.GreenPea:
                     set_sprite(game, entity, "groszek_obrany");
+                    control.Needs |= Layer.ProcessFinish;
                     transform.Scale[0] = 0.5;
                     transform.Scale[1] = 0.5;
                     break;
@@ -115,12 +116,15 @@ function update(game: Game, entity: Entity) {
             switch (control.Kind) {
                 case ProcessKind.Potato:
                     set_sprite(game, entity, "ziemniak_kawalek" + integer(1, 2));
+                    control.Needs |= Layer.ProcessFinish;
                     break;
                 case ProcessKind.Carrot:
                     set_sprite(game, entity, "marchewka_kawalek" + integer(1, 2));
+                    control.Needs |= Layer.ProcessFinish;
                     break;
                 case ProcessKind.Apple:
                     set_sprite(game, entity, "jablko_kawalek" + integer(1, 2));
+                    control.Needs |= Layer.ProcessFinish;
                     break;
             }
 
@@ -138,6 +142,11 @@ function update(game: Game, entity: Entity) {
             rigid_body.Acceleration[0] = float(-200, 200);
             collide.Radius = 0.5;
             return;
+        }
+
+        if (other.Layer & Layer.ProcessFinish) {
+            game.World.Signature[entity] &= ~Has.RigidBody2D;
+            game.World.Signature[entity] &= ~Has.CollideDynamic;
         }
     } else if (other.Layer > Layer.Obstacle) {
         // The ingredient is not supported by the current process. Eject it.

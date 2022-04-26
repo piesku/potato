@@ -12,7 +12,11 @@ export function blueprint_apple(game: Game) {
         control_process(ProcessKind.Apple, Layer.ProcessPeel),
         collide_dynamic(
             1,
-            Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut
+            Layer.Obstacle |
+                Layer.ProcessCook |
+                Layer.ProcessPeel |
+                Layer.ProcessCut |
+                Layer.ProcessFinish
         ),
         rigid_body2d(RigidKind.Dynamic, float(0.01, 0.001)),
     ];

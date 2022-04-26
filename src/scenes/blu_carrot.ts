@@ -9,10 +9,14 @@ export function blueprint_carrot(game: Game) {
     game.ItemCount++;
     return [
         render2d("marchewka_surowa"),
-        control_process(ProcessKind.Carrot, Layer.ProcessBoil | Layer.ProcessPeel),
+        control_process(ProcessKind.Carrot, Layer.ProcessCook | Layer.ProcessPeel),
         collide_dynamic(
             1,
-            Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut
+            Layer.Obstacle |
+                Layer.ProcessCook |
+                Layer.ProcessPeel |
+                Layer.ProcessCut |
+                Layer.ProcessFinish
         ),
         rigid_body2d(RigidKind.Dynamic, float(0.01, 0.001)),
     ];
