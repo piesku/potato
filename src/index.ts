@@ -27,6 +27,8 @@ window.playNow = function () {
     game.PlayState = "play";
     scene_stage(game);
 
+    document.querySelector("audio")!.play();
+
     let sim = {
         pauseLoop() {
             game.Stop();
@@ -60,6 +62,17 @@ window.playNow = function () {
         addPlank() {
             instantiate(game, [transform2d([0, 0], -45, [4, 1]), ...blueprint_board1(game)]);
         },
+
+        toggleMusic() {
+            let audio = document.querySelector("audio")!;
+            if (audio.paused) {
+                toggleMusic.name("Pause Music");
+                audio.play();
+            } else {
+                toggleMusic.name("Play Music");
+                audio.pause();
+            }
+        },
     };
 
     let gui = new dat.GUI();
@@ -69,8 +82,12 @@ window.playNow = function () {
     gui_sim.add(sim, "restart").name("Restart");
     gui_sim.open();
 
+    let gui_audio = gui.addFolder("Settings");
+    var toggleMusic = gui_audio.add(sim, "toggleMusic").name("Pause Music");
+    gui_audio.open();
+
     let gui_objects = gui.addFolder("Utensils");
-    gui_objects.add(sim, "addPlank").name("Cutting Board");
+    gui_objects.add(sim, "addPlank").name("Add a Wooden Board");
     gui_objects.open();
 
     let gui_spawn = gui.addFolder("Ingredients");
