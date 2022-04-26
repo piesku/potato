@@ -51,7 +51,7 @@ export class Game extends Game3D {
     spawnCount = 1;
     physicsGravity = 9.81;
     physicsFriction = 0;
-    physicsBounce = 1;
+    physicsBounce = 1.1;
     physicsCollisions = true;
 
     ItemCount = 0;

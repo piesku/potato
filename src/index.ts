@@ -34,7 +34,7 @@ let sim = {
     physicsReset() {
         game.physicsGravity = 9.81;
         game.physicsFriction = 0;
-        game.physicsBounce = 1;
+        game.physicsBounce = 1.1;
     },
 };
 
