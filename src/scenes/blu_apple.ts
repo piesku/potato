@@ -9,7 +9,7 @@ export function blueprint_apple(game: Game) {
     game.ItemCount++;
     return [
         render2d("jablko_surowe"),
-        control_process(ProcessKind.Apple, Layer.ProcessPeel | Layer.ProcessCut),
+        control_process(ProcessKind.Apple, Layer.ProcessPeel),
         collide_dynamic(
             1,
             Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut

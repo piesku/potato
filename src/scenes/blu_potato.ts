@@ -13,10 +13,7 @@ export function blueprint_potato(game: Game) {
             "ziemniak_surowy",
             hsva_to_vec4(float(0.1, 0.15), float(0, 0.5), float(0.5, 1), 1)
         ),
-        control_process(
-            ProcessKind.Potato,
-            Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut
-        ),
+        control_process(ProcessKind.Potato, Layer.ProcessBoil | Layer.ProcessPeel),
         collide_dynamic(
             1,
             Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut

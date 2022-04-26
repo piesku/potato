@@ -9,7 +9,7 @@ export function blueprint_greenpea(game: Game) {
     game.ItemCount++;
     return [
         render2d("groszek_surowy"),
-        control_process(ProcessKind.GreenPea, Layer.ProcessBoil | Layer.ProcessPeel),
+        control_process(ProcessKind.GreenPea, Layer.ProcessBoil),
         collide_dynamic(
             1,
             Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut

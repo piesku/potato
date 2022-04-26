@@ -9,10 +9,7 @@ export function blueprint_carrot(game: Game) {
     game.ItemCount++;
     return [
         render2d("marchewka_surowa"),
-        control_process(
-            ProcessKind.Carrot,
-            Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut
-        ),
+        control_process(ProcessKind.Carrot, Layer.ProcessBoil | Layer.ProcessPeel),
         collide_dynamic(
             1,
             Layer.Obstacle | Layer.ProcessBoil | Layer.ProcessPeel | Layer.ProcessCut

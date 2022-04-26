@@ -2,7 +2,6 @@
  * @module systems/sys_control_always2d
  */
 
-import {hsva_to_vec4} from "../../common/color.js";
 import {get_translation} from "../../common/mat2d.js";
 import {float, integer} from "../../common/random.js";
 import {Entity} from "../../common/world.js";
@@ -41,7 +40,31 @@ function update(game: Game, entity: Entity) {
         rigid_body.VelocityResolved[1] = 0;
 
         if (other.Layer & Layer.ProcessBoil) {
-            set_color(game, entity, hsva_to_vec4(float(0, 0.1), 1, 1, 1));
+            set_color(game, entity, [1, 1, 1, 1]);
+            switch (control.Kind) {
+                case ProcessKind.Potato:
+                    if (control.Needs & Layer.ProcessPeel) {
+                        set_sprite(game, entity, "ziemniak_ugotowany");
+                    } else {
+                        set_sprite(game, entity, "ziemniak_obrany_ugotowany");
+                        control.Needs |= Layer.ProcessCut;
+                    }
+                    break;
+                case ProcessKind.Carrot:
+                    if (control.Needs & Layer.ProcessPeel) {
+                        set_sprite(game, entity, "marchewka_ugotowana");
+                    } else {
+                        set_sprite(game, entity, "marchewka_obrana_ugotowana");
+                        control.Needs |= Layer.ProcessCut;
+                    }
+                    break;
+                case ProcessKind.GreenPea:
+                    set_sprite(game, entity, "groszek_ugotowany");
+                    control.Needs |= Layer.ProcessPeel;
+                    break;
+                case ProcessKind.Apple:
+                    break;
+            }
             return;
         }
 
@@ -49,16 +72,29 @@ function update(game: Game, entity: Entity) {
             set_color(game, entity, [1, 1, 1, 1]);
             switch (control.Kind) {
                 case ProcessKind.Potato:
-                    set_sprite(game, entity, "ziemniak_obrany");
+                    if (control.Needs & Layer.ProcessBoil) {
+                        set_sprite(game, entity, "ziemniak_obrany");
+                    } else {
+                        set_sprite(game, entity, "ziemniak_obrany_ugotowany");
+                        control.Needs |= Layer.ProcessCut;
+                    }
                     break;
                 case ProcessKind.Carrot:
-                    set_sprite(game, entity, "marchewka_obrana");
+                    if (control.Needs & Layer.ProcessBoil) {
+                        set_sprite(game, entity, "marchewka_obrana");
+                    } else {
+                        set_sprite(game, entity, "marchewka_obrana_ugotowana");
+                        control.Needs |= Layer.ProcessCut;
+                    }
                     break;
                 case ProcessKind.GreenPea:
                     set_sprite(game, entity, "groszek_obrany");
+                    transform.Scale[0] = 0.5;
+                    transform.Scale[1] = 0.5;
                     break;
                 case ProcessKind.Apple:
                     set_sprite(game, entity, "jablko_obrane");
+                    control.Needs |= Layer.ProcessCut;
                     break;
             }
 

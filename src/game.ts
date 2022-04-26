@@ -2,6 +2,7 @@ import {Game3D} from "../common/game.js";
 import {Texture} from "../common/texture.js";
 import {
     GL_ARRAY_BUFFER,
+    GL_BLEND,
     GL_FLOAT,
     GL_STATIC_DRAW,
     GL_STREAM_DRAW,
@@ -67,7 +68,7 @@ export class Game extends Game3D {
         super();
 
         this.Gl.pixelStorei(GL_UNPACK_FLIP_Y_WEBGL, true);
-        //this.Gl.enable(GL_BLEND);
+        this.Gl.enable(GL_BLEND);
 
         let material = this.MaterialInstanced;
 
