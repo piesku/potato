@@ -22,12 +22,15 @@ export function App(game: Game) {
                 6px 6px 0 indigo;
             "
         >
-            Super<br />Simple<br />Salad<br />Simulator
+            Super Simple Salad Simulator
         </h1>
-        <h2 onclick="playNow();" style="text-shadow: 2px 2px 0 yellow;">Play Now!</h2>
         <p style="text-shadow: 2px 2px 0 green;">
-            Move objects by grabbing them with the mouse, rotate them with the mouse wheel. Discover
-            the recipe for the perfect salad!
+            Discover the recipe for the tasty springtime treat: the veggy salad! Cut the green peas
+            and cook the apples — or is it the other way around? Experiment to find out!
         </p>
+        <p style="text-shadow: 2px 2px 0 orange;">
+            Move objects by grabbing them with the mouse, rotate them with the mouse wheel.
+        </p>
+        <h2 onclick="playNow();" style="text-shadow: 2px 2px 0 yellow;">Play Now!</h2>
     </div>`;
 }
