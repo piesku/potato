@@ -56,6 +56,7 @@ export class Game extends Game3D {
     physicsBounce = 1.1;
     physicsCollisions = true;
 
+    PlayState: "title" | "play" = "title";
     ItemCount = 0;
 
     /**

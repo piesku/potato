@@ -2,6 +2,7 @@ import * as dat from "dat.gui";
 import {create_texture_from, fetch_image} from "../common/texture.js";
 import {Game} from "./game.js";
 import {scene_stage} from "./scenes/sce_stage.js";
+import {scene_title} from "./scenes/sce_title.js";
 
 let game = new Game();
 
@@ -9,7 +10,7 @@ let game = new Game();
 window.game = game;
 
 Promise.all([load_texture(game, "spritesheet.png")]).then(() => {
-    scene_stage(game);
+    scene_title(game);
     game.Start();
 });
 
@@ -18,55 +19,61 @@ async function load_texture(game: Game, name: string) {
     game.Textures[name] = create_texture_from(game.Gl, image);
 }
 
-let sim = {
-    pauseLoop() {
-        game.Stop();
-    },
+// @ts-ignore
+window.playNow = function () {
+    game.PlayState = "play";
+    scene_stage(game);
 
-    resumeLoop() {
-        game.Start();
-    },
+    let sim = {
+        pauseLoop() {
+            game.Stop();
+        },
 
-    start() {
-        game.spawnEnabled = !game.spawnEnabled;
-        if (game.spawnEnabled) {
+        resumeLoop() {
+            game.Start();
+        },
+
+        start() {
+            game.spawnEnabled = !game.spawnEnabled;
+            if (game.spawnEnabled) {
+                run.name("Pause");
+            } else {
+                run.name("Resume");
+            }
+        },
+
+        restart() {
+            game.Restart();
+            game.spawnEnabled = true;
             run.name("Pause");
-        } else {
-            run.name("Resume");
-        }
-    },
+        },
 
-    restart() {
-        game.Restart();
-        game.spawnEnabled = true;
-        run.name("Pause");
-    },
+        physicsReset() {
+            game.physicsGravity = 9.81;
+            game.physicsFriction = 0;
+            game.physicsBounce = 1.1;
+        },
+    };
 
-    physicsReset() {
-        game.physicsGravity = 9.81;
-        game.physicsFriction = 0;
-        game.physicsBounce = 1.1;
-    },
+    let gui = new dat.GUI();
+
+    let gui_sim = gui.addFolder("Simulation");
+    var run = gui_sim.add(sim, "start").name("Run!");
+    gui_sim.add(sim, "restart").name("Restart");
+    gui_sim.open();
+
+    let gui_spawn = gui.addFolder("Spawning");
+    gui_spawn.add(game, "spawnInterval", 0, 1).step(0.01).name("Interval (s)");
+    gui_spawn.add(game, "spawnCount", 1, 5).step(1).name("Multiplier");
+
+    let gui_physics = gui.addFolder("Physics");
+    gui_physics.add(game, "physicsCollisions").name("Enable Collisions");
+    gui_physics.add(game, "physicsGravity", 0, 20).step(0.01).listen().name("Gravity");
+    gui_physics.add(game, "physicsFriction", 0, 1).step(0.01).listen().name("Friction");
+    gui_physics.add(game, "physicsBounce", 0, 3).step(0.01).listen().name("Bounciness");
+    gui_physics.add(sim, "physicsReset").name("Reset");
+
+    let gui_loop = gui.addFolder("Game Loop");
+    gui_loop.add(sim, "pauseLoop").name("Pause");
+    gui_loop.add(sim, "resumeLoop").name("Resume");
 };
-
-let gui = new dat.GUI();
-
-let gui_sim = gui.addFolder("Simulation");
-var run = gui_sim.add(sim, "start").name("Run!");
-gui_sim.add(sim, "restart").name("Restart");
-gui_sim.open();
-
-let gui_spawn = gui.addFolder("Spawning");
-gui_spawn.add(game, "spawnInterval", 0, 1).step(0.01).name("Interval (s)");
-gui_spawn.add(game, "spawnCount", 1, 5).step(1).name("Multiplier");
-
-let gui_physics = gui.addFolder("Physics");
-gui_physics.add(game, "physicsCollisions").name("Enable Collisions");
-gui_physics.add(game, "physicsGravity", 0, 20).step(0.01).listen().name("Gravity");
-gui_physics.add(game, "physicsFriction", 0, 1).step(0.01).listen().name("Friction");
-gui_physics.add(game, "physicsBounce", 0, 3).step(0.01).listen().name("Bounciness");
-gui_physics.add(sim, "physicsReset").name("Reset");
-
-let gui_loop = gui.addFolder("Game Loop");
-gui_loop.add(sim, "pauseLoop").name("Pause");
-gui_loop.add(sim, "resumeLoop").name("Resume");

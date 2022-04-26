@@ -22,6 +22,7 @@ import {blueprint_potato} from "./blu_potato.js";
 export function scene_stage(game: Game) {
     game.World = new World(WORLD_CAPACITY);
     game.ViewportResized = true;
+    game.spawnEnabled = false;
 
     // Camera.
     instantiate(game, [
