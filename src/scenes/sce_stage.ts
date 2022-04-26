@@ -99,9 +99,9 @@ export function scene_stage(game: Game) {
         instantiate(game, [transform2d([-10 + i * 5, 0], -45, [4, 1]), ...blueprint_board1(game)]);
     }
 
-    for (let i = 0; i < 2; i++) {
-        instantiate(game, [...blueprint_cooker(game), transform2d([-5, -5 - i * 5], 0, [4, 3])]);
-        instantiate(game, [...blueprint_peeler(game), transform2d([0, -5 - i * 5], 0, [4, 3])]);
-        instantiate(game, [...blueprint_cutter(game), transform2d([5, -5 - i * 5], 0, [4, 3])]);
-    }
+    instantiate(game, [...blueprint_cooker(game), transform2d([-5, -5], 0, [4, 3])]);
+    instantiate(game, [...blueprint_peeler(game), transform2d([0, -5], 0, [4, 3])]);
+    instantiate(game, [...blueprint_cutter(game), transform2d([5, -5], 0, [4, 3])]);
+    instantiate(game, [...blueprint_cooker(game), transform2d([-5, -10], 0, [4, 3])]);
+    instantiate(game, [...blueprint_peeler(game), transform2d([0, -10], 0, [4, 3])]);
 }
