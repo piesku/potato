@@ -24,6 +24,10 @@ export function App(game: Game) {
         >
             Super<br />Simple<br />Salad<br />Simulator
         </h1>
-        <h2 onclick="playNow();">Play Now!</h2>
+        <h2 onclick="playNow();" style="text-shadow: 2px 2px 0 yellow;">Play Now!</h2>
+        <p style="text-shadow: 2px 2px 0 green;">
+            Move objects by grabbing them with the mouse, rotate them with the mouse wheel. Discover
+            the recipe for the perfect salad!
+        </p>
     </div>`;
 }
