@@ -44,6 +44,7 @@ let gui_sim = gui.addFolder("Simulation");
 gui_sim.add(sim, "restart").name("Restart");
 gui_sim.add(sim, "pause").name("Pause");
 gui_sim.add(sim, "resume").name("Resume");
+gui_sim.open();
 
 let gui_spawn = gui.addFolder("Spawning");
 gui_spawn.add(game, "spawnInterval", 0, 1).step(0.01).name("Interval (s)");
